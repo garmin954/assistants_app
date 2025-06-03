@@ -1,0 +1,83 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 4697968 */
+  src: url('iconfont.woff2?t=1744367767914') format('woff2'),
+       url('iconfont.woff?t=1744367767914') format('woff'),
+       url('iconfont.ttf?t=1744367767914') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-configuration:before {
+  content: "\e60a";
+}
+
+.icon-general:before {
+  content: "\e60b";
+}
+
+.icon-update:before {
+  content: "\e609";
+}
+
+.icon-test-aging:before {
+  content: "\e601";
+}
+
+.icon-test_joint:before {
+  content: "\e602";
+}
+
+.icon-test_configuration:before {
+  content: "\e608";
+}
+
+.icon-clear:before {
+  content: "\e603";
+}
+
+.icon-back:before {
+  content: "\e600";
+}
+
+.icon-fullscreen-expand:before {
+  content: "\e607";
+}
+
+.icon-fullscreen:before {
+  content: "\e605";
+}
+
+.icon-close:before {
+  content: "\e606";
+}
+
+.icon-minimize:before {
+  content: "\e604";
+}
+
+.icon-fanhuidingbu:before {
+  content: "\e6e6";
+}
+
+.icon-adjust:before {
+  content: "\e664";
+}
+
+.icon-direction-left:before {
+  content: "\e66c";
+}
+
+.icon-fullscreen-shrink:before {
+  content: "\e676";
+}
+
+.icon-minus:before {
+  content: "\e67a";
+}
+

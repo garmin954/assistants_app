@@ -1,0 +1,9 @@
+# 忽略特定目录
+node_modules/
+target/
+
+# 忽略特定文件
+src-tauri/resources.zip
+src-tauri/resources
+src-tauri/run.pid
+src-tauri/log

@@ -1,0 +1,8 @@
+.dark {
+    --primary: 226 78% 50%;
+    --text-color: #3f3f3f;
+    --text-color-light: #6e6e6e;
+    --sub-text-color: #7C7C7C;
+    --reverse-text-color: #ffffff;
+    --card: #ffffff;
+}

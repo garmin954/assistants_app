@@ -1,0 +1,10 @@
+{
+    "xarmcore":{
+        "pid":32220,
+        "ppid":26836
+    },
+    "xarmdaemon":{
+        "pid":null,
+        "ppid":null
+    }
+}

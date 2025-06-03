@@ -1,0 +1,30 @@
+@font-face {
+    font-family: 'SourceHanSansCN-Mediums';
+    src: url('SourceHanSansCN-Medium.otf');
+
+}
+
+@font-face {
+    font-family: 'SourceHanSansCN-Regular';
+    src: url('./SourceHanSansCN-Regular.otf');
+}
+
+@font-face {
+    font-family: 'SourceHanSansCN-Light';
+    src: url('./SourceHanSansCN-Light.otf');
+
+}
+
+
+.uf-font-medium {
+    font-family: 'SourceHanSansCN-Mediums' !important;
+}
+
+
+.uf-font-regular {
+    font-family: 'SourceHanSansCN-Regular' !important;
+}
+
+.uf-font-light {
+    font-family: 'SourceHanSansCN-Light' !important;
+}
