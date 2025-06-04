@@ -29,7 +29,7 @@ pub async fn set_beta_updater<R: tauri::Runtime>(
     info!("开始检查测试版更新");
 
     let update_url =
-        match tauri::Url::parse("http://192.168.1.19/releases/xarm/xarm_tool/releases_beta.json") {
+        match tauri::Url::parse("http://192.168.1.19/releases/xarm/assistant/releases_beta.json") {
             Ok(url) => url,
             Err(e) => return Response::error(format!("解析更新URL失败: {}", e)),
         };
@@ -45,7 +45,7 @@ pub async fn set_stable_updater<R: tauri::Runtime>(
     info!("开始检查生产版更新");
 
     let update_url =
-        match tauri::Url::parse("http://192.168.1.19/releases/xarm/xarm_tool/releases.json") {
+        match tauri::Url::parse("http://192.168.1.19/releases/xarm/assistant/releases.json") {
             Ok(url) => url,
             Err(e) => return Response::error(format!("解析更新URL失败: {}", e)),
         };

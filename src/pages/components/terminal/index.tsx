@@ -12,7 +12,6 @@ import clsx from "clsx";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useDebounceFn, useRequest, useSize } from "ahooks";
-import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { useDispatch, useSelector } from "react-redux";
 import { RootDispatch, RootState } from "@/store";
 import {
@@ -63,7 +62,7 @@ export default forwardRef<TerminalRefType, Props>((props, ref) => {
       if (e.key === "\x03") {
         const selectedText = instance.getSelection();
         if (selectedText) {
-          writeText(selectedText);
+          // writeText(selectedText);
         }
       }
     });

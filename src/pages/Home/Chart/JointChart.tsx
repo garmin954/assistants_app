@@ -16,6 +16,7 @@ import {
 import { LineChart } from "echarts/charts";
 import { UniversalTransition } from "echarts/features";
 import { CanvasRenderer } from "echarts/renderers";
+import { LegendComponent } from 'echarts/components';
 import {
   ARM_JOINT_TYPE_UNIT,
   ChartJointValueMap,
@@ -37,6 +38,7 @@ echarts.use([
   UniversalTransition,
   DataZoomInsideComponent,
   TooltipComponent,
+  LegendComponent
 ]);
 
 interface Props {

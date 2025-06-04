@@ -10,12 +10,11 @@ interface Props {
   isBeta?: boolean;
 }
 export default function LogicUpdater() {
-  const {state,  onCloseUpdaterDialog, onDownloadApp} = useUpdater();
+  const {state,  onCloseUpdaterDialog, onDownloadApp, onCheckUpdater} = useUpdater();
 
   useEffect(() => {
-    // onCheckUpdater();
+    onCheckUpdater();
     console.log('state.updater==>', state.updater);
-    
   }, [])
 
 

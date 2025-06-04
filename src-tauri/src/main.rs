@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    xarm_tool_lib::run()
+    xarm_assistants_lib::run()
 }

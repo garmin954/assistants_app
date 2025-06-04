@@ -36,7 +36,7 @@ pub async fn fetch_history_releases<R: tauri::Runtime>(
 ) -> Result<Notes, String> {
     // 目标 URL
     let url = format!(
-        "http://192.168.1.19/releases/xarm/xarm_tool/history/{}.json",
+        "http://192.168.1.19/releases/xarm/assistant/history/{}.json",
         version
     );
 

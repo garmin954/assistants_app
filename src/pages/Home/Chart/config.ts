@@ -3,11 +3,15 @@ export const CHARTS_OPTIONS = {
     renderer: 'canvas',
     grid: {
         top: '5%',    // 上边距
-        bottom: '10%', // 下边距
+        bottom: '20%', // 下边距
         left: '40',   // 左边距
         right: '10'   // 右边距
     },
-
+    legend: {
+        show: true,
+        bottom: 0,           // 距离底部距离
+        orient: 'horizontal', // 水平排列（默认）
+    },
     dataZoom: [
         {
             type: 'inside',
@@ -51,8 +55,7 @@ export const CHARTS_OPTIONS = {
     animation: false,
     tooltip: {
         trigger: 'axis', // 触发类型，'axis' 表示横轴触发
-        // formatter: '({a0}:{b0}, {c0})({b0}:{b1}, {c1})',// 提示框的内容，{b} 表示类目轴的数据，{c} 表示数据值
-        // confine: true
+        triggerOn: "click",
     },
 }
 

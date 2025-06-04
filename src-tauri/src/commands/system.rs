@@ -139,7 +139,7 @@ pub async fn start_server<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> String
 
     let r = open_server(app_path, SERVER_NAME);
 
-     match r {
+    match r {
         Some(child) => {
             let pid = child.id().to_string();
             return pid;

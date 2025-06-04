@@ -24,7 +24,6 @@ import {
 import { useRequest } from "ahooks";
 import { useOptions } from "./useOptions";
 import { OPTION_EMPTY } from "@/lib/constant";
-import i18n from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import SwitchButton from "@/pages/components/switch_button";
 

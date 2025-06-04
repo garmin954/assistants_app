@@ -48,15 +48,18 @@ fn main() {
     // 解析命令行参数
     let args = Args::parse();
     *RELEASE_TYPE.lock().unwrap() = args.release_type.clone();
-    
+
     let release_type_str = if args.release_type == ReleaseType::Beta {
         "测试版(Beta)"
     } else {
         "正式版(Stable)"
     };
-    
-    println!("【info】:开始生成{}升级包 ----------------------------------------------", release_type_str);
-    
+
+    println!(
+        "【info】:开始生成{}升级包 ----------------------------------------------",
+        release_type_str
+    );
+
     // 将config设置成全局的
     match read_tauri_config() {
         Ok(_) => {}
@@ -104,12 +107,12 @@ fn read_tauri_config() -> Result<TauriConfig, Box<dyn Error>> {
 // 迁移升级包
 fn migrate_upgrade_package() -> Result<(), String> {
     let release_type = RELEASE_TYPE.lock().unwrap();
-    
+
     // 根据发布类型选择目标目录
     let target_dir = if *release_type == ReleaseType::Beta {
-        Path::new(r"\\192.168.1.19\releases\xarm\xarm_tool\beta-packages\window")
+        Path::new(r"\\192.168.1.19\releases\xarm\assistant\beta-packages\window")
     } else {
-        Path::new(r"\\192.168.1.19\releases\xarm\xarm_tool\packages\window")
+        Path::new(r"\\192.168.1.19\releases\xarm\assistant\packages\window")
     };
 
     let config = TAURI_CONFIG.lock().unwrap();
@@ -180,7 +183,7 @@ fn generate_release_json() -> Result<(), Box<dyn Error>> {
     let signature = SIGNATURE.lock().unwrap();
     let app_name = APP_NAME.lock().unwrap();
     let release_type = RELEASE_TYPE.lock().unwrap();
-    
+
     // 将md文件内容转成html
     let content_html = utils::md_to_html().unwrap();
 
@@ -217,18 +220,25 @@ fn generate_release_json() -> Result<(), Box<dyn Error>> {
         platforms: Platforms {
             linux_x86_64: Platform {
                 signature: signature.to_string(),
-                url: format!("https://192.168.1.19/releases/xarm/xarm_tool/{}/linux/", base_url),
+                url: format!(
+                    "https://192.168.1.19/releases/xarm/assistant/{}/linux/",
+                    base_url
+                ),
             },
             windows_x86_64: Platform {
                 signature: signature.to_string(),
                 url: format!(
-                    "http://192.168.1.19/releases/xarm/xarm_tool/{}/window/{}",
-                    base_url, app_name.to_string()
+                    "http://192.168.1.19/releases/xarm/assistant/{}/window/{}",
+                    base_url,
+                    app_name.to_string()
                 ),
             },
             darwin_x86_64: Platform {
                 signature: signature.to_string(),
-                url: format!("https://192.168.1.19/releases/xarm/xarm_tool/{}/macos/", base_url),
+                url: format!(
+                    "https://192.168.1.19/releases/xarm/assistant/{}/macos/",
+                    base_url
+                ),
             },
         },
     };
@@ -255,7 +265,7 @@ fn generate_release_json() -> Result<(), Box<dyn Error>> {
     println!("Generated {} file: {}", output_filename, config.version);
 
     // 复制文件到共享目录
-    let target_dir = Path::new(r"\\192.168.1.19\releases\xarm\xarm_tool\");
+    let target_dir = Path::new(r"\\192.168.1.19\releases\xarm\assistant\");
     utils::copy_files_to_shared_dir(releases_path, target_dir).unwrap();
 
     // 只有正式版才生成历史版本文件
@@ -270,6 +280,6 @@ fn generate_release_json() -> Result<(), Box<dyn Error>> {
         println!("version_dir: {:?}", version_dir);
         utils::copy_files_to_shared_dir(version_path, version_dir.as_path()).unwrap();
     }
-    
+
     Ok(())
 }

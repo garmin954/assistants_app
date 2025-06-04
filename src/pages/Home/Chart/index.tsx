@@ -1,6 +1,5 @@
 import React, {
   useMemo,
-  forwardRef,
   Suspense,
   useEffect,
   useRef,
@@ -29,19 +28,14 @@ interface Props {
   useRad: boolean;
 }
 
-type RefType = {
-  clearChartData: () => void;
-};
-
-export default forwardRef<RefType, Props>((props, ref) => {
-  const { t: _t, i18n } = useTranslation();
+export default React.memo((props:Props) => {
+  const { t: _t,  } = useTranslation();
   const wsState = useSelector<RootState, WsState>((state) => state.ws);
   const state = useSelector<RootState, AssistantsState>(
     (state) => state.assistants
   );
 
   const { jointOrCoordinateOptions } = useOptions(state);
-  const loading = useRef(false);
 
   const echartsRef = useRef<{
     [key: string]: any;

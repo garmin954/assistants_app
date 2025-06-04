@@ -1,13 +1,13 @@
 use log;
 use std::error::Error;
 use std::fs::metadata;
+use std::io::BufRead;
+use std::io::BufReader;
 use std::os::windows::process::CommandExt;
 use std::path::Path;
 use std::path::PathBuf;
-use tauri::Manager;
 use std::process::{Command, Stdio};
-use std::io::BufReader;
-use std::io::BufRead;
+use tauri::Manager;
 
 // use crate::utils::process_manage::{is_process_running, kill_process};
 
@@ -75,8 +75,8 @@ pub fn open_server(app_path: PathBuf, server_name: &str) -> Option<std::process:
         .expect("Failed to start process");
 
     // 获取标准输出和错误输出的句柄
-    let  stdout = child.stdout.take().expect("无法获取标准输出");
-    let  stderr = child.stderr.take().expect("无法获取标准错误");
+    let stdout = child.stdout.take().expect("无法获取标准输出");
+    let stderr = child.stderr.take().expect("无法获取标准错误");
 
     let stdout_name = server_name.to_string();
     let stderr_name = server_name.to_string();
@@ -86,7 +86,9 @@ pub fn open_server(app_path: PathBuf, server_name: &str) -> Option<std::process:
         let mut reader = BufReader::new(stdout);
         let mut line = String::new();
         while let Ok(n) = reader.read_line(&mut line) {
-            if n == 0 { break; }
+            if n == 0 {
+                break;
+            }
             log::info!("[{}]==> {}", stdout_name, line.trim());
             line.clear();
         }
@@ -97,7 +99,9 @@ pub fn open_server(app_path: PathBuf, server_name: &str) -> Option<std::process:
         let mut reader = BufReader::new(stderr);
         let mut line = String::new();
         while let Ok(n) = reader.read_line(&mut line) {
-            if n == 0 { break; }
+            if n == 0 {
+                break;
+            }
             log::error!("[{}]==> {}", stderr_name, line.trim());
             line.clear();
         }
