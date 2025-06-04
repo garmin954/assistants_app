@@ -168,11 +168,11 @@ export default forwardRef<TerminalRefType, Props>((props, ref) => {
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     const len = state.cmdsHistory.length;
     if (["ArrowUp", "ArrowDown"].includes(e.key) && len > 0) {
-      let index = state.cmdPointer + (e.key === "ArrowUp" ? 1 : -1);
+      const index = state.cmdPointer + (e.key === "ArrowUp" ? 1 : -1);
 
       if (len - index in state.cmdsHistory) {
         dispatch(setCmdPointer(index));
-        let cmd = state.cmdsHistory[len - index];
+        const cmd = state.cmdsHistory[len - index];
         setCommand(cmd);
         e.currentTarget.focus();
         setTimeout(() => {

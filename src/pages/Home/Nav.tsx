@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootDispatch, RootState } from "@/store";
 import { AssistantsState } from "@/store/features/assistants";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { ChartWorker } from "@/lib/worker";
 
 const Languages = [
   {
@@ -30,6 +31,8 @@ const Languages = [
     code: "zh-CN",
   },
 ];
+
+const worker = ChartWorker.getInstance();
 
 export default function Nav() {
   const { t, i18n } = useTranslation();
@@ -46,6 +49,9 @@ export default function Nav() {
   // 切换语言
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
+    worker.postMessage({
+       type: "post_chart_data",
+    });
     getCurrentWindow().setTitle(t("appTitle"));
   };
 
@@ -53,7 +59,7 @@ export default function Nav() {
     return Languages.find((item) => item.code === i18n.language);
   }, [i18n.language]);
 
-  const [ipAddress, setIpAddress] = useState("192.168.1.33");
+  const [ipAddress, setIpAddress] = useState("192.168.1.");
   const [isValidIp, setIsValidIp] = useState(true);
 
   const validateIp = (ip: string) => {

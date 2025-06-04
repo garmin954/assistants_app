@@ -14,7 +14,7 @@
 
 @layer utilities {
   .theme-light {
-    --background: 210 40% 98%;
+    --background: 219 11.3% 98%;
     --foreground: 0 0% 21.57%;
     --subtext: 215 14% 34%;
     --disabled: 218 11% 65%;
@@ -89,11 +89,7 @@ body,
     sans-serif;
 
   @media screen and (min-width: 1440px) {
-     {
-       {
-        /* font-size: 14px; */
-      }
-    }
+    /* font-size: 14px; */
   }
 }
 
@@ -140,6 +136,7 @@ body::-webkit-scrollbar-thumb {
   0% {
     background-position: 200% 50%;
   }
+
   100% {
     background-position: -100% 50%;
   }

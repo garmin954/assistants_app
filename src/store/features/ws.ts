@@ -60,8 +60,7 @@ export const WS = createSlice({
                             continue
                         }
                     }
-                    // @ts-ignore
-                    equalAssignment(state, k, payload.data[k])
+                    // equalAssignment(state, k, payload.data[k])
                 }
             }
         },

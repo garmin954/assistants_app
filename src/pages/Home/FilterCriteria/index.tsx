@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
 import SwitchButton from "@/pages/components/switch_button";
 
 export default function FilterCriteria() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dispatch = useDispatch<RootDispatch>();
   const state = useSelector<RootState, AssistantsState>(
     (state) => state.assistants
@@ -134,14 +134,17 @@ export default function FilterCriteria() {
 
   return (
     <div className="flex justify-between">
-      <div className="flex justify-start gap-5">
+      <div className={cn(
+        "flex justify-start gap-5",
+        i18n.language === "en-US" && " w-[60%] overflow-x-auto"
+      )}>
         {/* 观测分析 */}
         <Select
           value={state.filter_field.mode}
           onValueChange={(value) => setFormValue({ mode: value })}
           disabled={disabledState}
         >
-          <SelectTrigger className="w-fit">
+          <SelectTrigger className="w-fit bg-white">
             <SelectValue placeholder={state.filter_field.mode}></SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -161,7 +164,7 @@ export default function FilterCriteria() {
           }
           disabled={disabledState}
         >
-          <SelectTrigger className="w-fit max-w-[12rem]" title={jointTypeTitle}>
+          <SelectTrigger className="w-fit max-w-[12rem] bg-white" title={jointTypeTitle}>
             <SelectValue
               className="text-start"
               placeholder={state.filter_field.jointType}
@@ -182,7 +185,7 @@ export default function FilterCriteria() {
           onValueChange={(value) => setFormValue({ joint: value })}
           disabled={disabledState}
         >
-          <SelectTrigger className="w-fit max-w-[10rem] min-w-[7rem]">
+          <SelectTrigger className="w-fit max-w-[10rem] min-w-[7rem] bg-white">
             <SelectValue placeholder={state.filter_field.joint}></SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -200,7 +203,7 @@ export default function FilterCriteria() {
           onValueChange={(value) => setFormValue({ hz: value })}
           disabled={disabledState}
         >
-          <SelectTrigger className="w-[7rem]">
+          <SelectTrigger className="w-[7rem] bg-white">
             <SelectValue placeholder={state.filter_field.hz}></SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -219,7 +222,7 @@ export default function FilterCriteria() {
             onValueChange={(value) => setFormValue({ unit: value })}
             disabled={disabledState}
           >
-            <SelectTrigger className="w-[7rem]">
+            <SelectTrigger className="w-[7rem] bg-white">
               <SelectValue placeholder={state.filter_field.unit}></SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -243,13 +246,13 @@ export default function FilterCriteria() {
             disabled={disabledState}
             autoFocus={false}
             type="number"
-            min={0}
-            max={999999}
+            min={1}
+            max={4000}
             value={state.filter_field.time}
             onChange={(e) => {
               setFormValue({ time: +e.target.value });
             }}
-            className="w-[5.3rem] text-center"
+            className="w-[5.3rem] text-center bg-white"
           />
           <span>S</span>
         </div>

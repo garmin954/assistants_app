@@ -1,4 +1,5 @@
 import { UPDATER_STEP } from "@/lib/constant";
+import { Response } from "@/pages/Layouts/SocketState/ws";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { invoke } from "@tauri-apps/api/core";
 import { check, Update } from "@tauri-apps/plugin-updater";
@@ -6,14 +7,14 @@ import { toast } from "sonner";
 
 let update: Update
 
-export const checkUpdater = createAsyncThunk<any, boolean>('updater/checkUpdate', async (isBeta = false) => {
+export const checkUpdater = createAsyncThunk<Response<any>, boolean>('updater/checkUpdate', async (isBeta = false) => {
     await check();
     return await invoke(`plugin:commands|set_${isBeta ? "beta" : "stable"}_updater`);
     // return await check();
 })
 
 // 下载
-export const downloadApp = createAsyncThunk('updater/downloadApp', (_data, { dispatch }) => {
+export const downloadApp = createAsyncThunk('updater/downloadApp', (_, { dispatch }) => {
     let contentLength = 0
     let downloaded = 0
     return update.download((event) => {
@@ -47,11 +48,11 @@ export const downloadApp = createAsyncThunk('updater/downloadApp', (_data, { dis
 })
 
 // 安装
-export const installApp = createAsyncThunk('updater/installApp', (_data, { }) => {
+export const installApp = createAsyncThunk('updater/installApp', () => {
     return update.install()
 })
 
-export const downloadInstall = createAsyncThunk('updater/downloadInstall', (_data, { dispatch }) => {
+export const downloadInstall = createAsyncThunk('updater/downloadInstall', (_, { dispatch }) => {
     let contentLength = 0
     let downloaded = 0
     return update.downloadAndInstall((event) => {
@@ -90,7 +91,7 @@ const UpdaterData = {
     content: "",
 }
 
-export const fetchHistoryReleases = createAsyncThunk<typeof UpdaterData, string>('updater/fetchHistoryReleases', (version, { }) => {
+export const fetchHistoryReleases = createAsyncThunk<typeof UpdaterData, string>('updater/fetchHistoryReleases', (version) => {
     return invoke("plugin:commands|fetch_history_releases", { version })
 })
 

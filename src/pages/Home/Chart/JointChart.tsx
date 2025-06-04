@@ -41,6 +41,7 @@ echarts.use([
 
 interface Props {
   index: number;
+  getChartData: () => void;
 }
 
 type RefType = {
@@ -65,6 +66,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
     if (echartsRef.current) {
       chart.current = echarts.init(echartsRef.current);
       setCharts(true);
+      
     }
     return () => {
       chart.current && chart.current.dispose();
@@ -82,6 +84,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
     if (set) {
       chart.current?.setOption(CHARTS_OPTIONS);
       setCurVal("0");
+      props.getChartData();
     }
     chart.current?.resize();
   }
@@ -100,9 +103,9 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
   // 更新数据
   function updateChartData(data: ChartJointValueMap, label: number[]) {
     const options = deepClone(CHARTS_OPTIONS);
-    options.series[0].symbol = "none";
+    // options.series[0].symbol = "none";
     if (state.filter_field.jointType === "xarm_joint_temperatures") {
-      options.series[0].symbol = "emptyCircle";
+      // options.series[0].symbol = "emptyCircle";
       // options.xAxis.axisLabel.formatter = (value) => {
       //   return value.slice(11, value.length);
       // };
@@ -111,7 +114,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
     options.xAxis.axisLabel.interval = Math.ceil(label.length / 6);
     options.series = [];
     let index = 0;
-    let val:string[] = [];
+    const val:string[] = [];
     (Object.keys(data) as JointValueKey[]).forEach((key) => {
       if (
         (state.filter_field.compare === "1" &&
@@ -120,18 +123,16 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
           key === "response_subtract_data") ||
         state.filter_field.mode === "observe"
       ) {
+        
         const d = data[key]!;
-        options.series.push(
-          setChartSeries(d, chartNameData[key], index === 0 ? "#2eba7b" : "#3662EC")
-        );
+        (options.series as any[]).push(setChartSeries(d, chartNameData[key]));
         index++
         if (d[d.length - 1] !== undefined) {
           val.push(d[d.length - 1].toString());
         }
       }
     });
-    setCurVal(val.join("-"));      
-
+    setCurVal(val.join("/"));      
     chart.current?.setOption(options, {
       // replaceMerge: ['xAxis', 'series'],
       notMerge: true, // 不合并配置
@@ -164,11 +165,10 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
   return (
     <div
       ref={enlargeRef}
-      className="bg-card rounded-sm shadow-sm px-6 pt-6 pb-12"
+      className="bg-card rounded-lg shadow-sm px-6 pt-6 pb-12"
     >
       <div className="chart-unit  uf-font-medium flex justify-between">
-        <div></div>
-        <div className="position-x-center">{title}</div>
+        <div className="ml-0 text-lg">{title}</div>
         <div className="right">{(curVal || 0) + " " + unitTxt}</div>
       </div>
       <div style={{ height: "100%", width: "100%" }} ref={echartsRef}></div>

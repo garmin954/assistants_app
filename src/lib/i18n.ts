@@ -21,7 +21,7 @@ i18n
         defaultNS: 'common',
         backend: {
             // 指定语言文件的加载路径（注意路径中的 __dirname 或 publicPath）
-            loadPath: '/src/assets/locales/{{lng}}/{{ns}}.json',
+            loadPath: '/locales/{{lng}}/{{ns}}.json',
         },
     });
 

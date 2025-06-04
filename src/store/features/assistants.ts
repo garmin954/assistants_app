@@ -17,7 +17,7 @@ export const SELECTED_FIELD = {
     hz: '250',
     type: "0",
     unit: '0',
-    time: 5,
+    time: 10,
     mode: 'observe',
     compare: "1",
 }
@@ -107,8 +107,8 @@ export const downloadObserverFile = createAsyncThunk<Response<unknown>>('assista
                 }]
             }).then(async (path) => {
                 if (path) {
-                    let save_path = await dirname(path!)
-                    let file_name = await basename(path!)
+                    const save_path = await dirname(path!)
+                    const file_name = await basename(path!)
                     ws.send('stop_status_report', {
                         save_path,
                         file_name
@@ -165,22 +165,40 @@ const slice = createSlice({
         },
         setSelectedField: (state, action) => {
             const { joint, jointType, hz, type, unit, time, mode, compare } = action.payload
+            // 设置角度/弧度
+            if (unit !== state.filter_field.unit) {
+                worker.postMessage({ type: "set_rad_unit", value: unit });
+            }
+
+            if (joint !== state.filter_field.joint) {
+                worker.postMessage({ type: "set_current_joint", value: joint });
+            }
+
+            if (jointType !== state.filter_field.jointType) {
+                worker.postMessage({ type: "set_joint_type", value: jointType });
+                worker.postMessage({ type: "clear_joints", value: null });
+            }
+
+            if (joint !== state.filter_field.joint || state.filter_field.compare !== compare || state.filter_field.unit !== unit) {
+                worker.postMessage({
+                    type: "post_chart_data",
+                    value: joint,
+                })
+            }
+
             state.filter_field.joint = joint
             state.filter_field.jointType = jointType
             state.filter_field.hz = hz
             state.filter_field.type = type
             state.filter_field.unit = unit
             state.filter_field.time = time
-            if (state.filter_field.compare !== compare) {
-                state.filter_field.compare = compare
-                worker.postMessage({
-                    type: "post_chart_data",
-                });
+            state.filter_field.compare = compare
 
-            }
             if (mode !== state.filter_field.mode) {
                 state.filter_field.mode = mode
                 state.filter_field.jointType = (mode === "observe" ? 'xarm_target_joint_positions' : 'xarm_target_joint_positions@xarm_actual_joint_positions')
+                worker.postMessage({ type: "set_joint_type", value: state.filter_field.jointType });
+                worker.postMessage({ type: "clear_joints", value: null });
             }
 
             state.curJoint = joint

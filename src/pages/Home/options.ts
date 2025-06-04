@@ -95,6 +95,7 @@ export const ARM_JOINT_TYPE_UNIT = {
     'filtered_data_torque_sensor': gur(['N', 3], ['N·m', 3]),
     // 关节温度
     'xarm_joint_temperatures': gur(['℃', 8]),
+    'response_subtract_data': gur(['rad', 8]),
 }
 
 export const MODE_JOINT_TYPE = Object.keys(ARM_JOINT_TYPE_UNIT) as (keyof typeof ARM_JOINT_TYPE_UNIT)[]
@@ -140,6 +141,11 @@ export const SHOW_RAD_TYPE = [
     'xarm_target_tcp_speed',
     'xarm_actual_tcp_pose',
     'xarm_actual_tcp_speed',
+    'xarm_target_joint_positions@xarm_actual_joint_positions',
+    'xarm_target_joint_velocities@xarm_actual_joint_velocities',
+    'xarm_target_joint_accelerations@xarm_actual_joint_accelerations',
+    'xarm_actual_tcp_pose@xarm_target_tcp_pose',
+    'xarm_actual_tcp_speed@xarm_target_tcp_speed'
 ]
 // 关节的字段
 export const optionsCorrespondingToParameters = (paramsType: keyof typeof ARM_JOINT_TYPE_UNIT): DefaultOptionType[] => {

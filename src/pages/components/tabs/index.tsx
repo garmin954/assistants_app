@@ -22,7 +22,7 @@ function Tabs(props: Props, ref: React.ForwardedRef<HTMLDivElement>) {
     }
   }
 
-  let pos = useMemo(() => {
+  const pos = useMemo(() => {
     return tabRefs.current[tabValue];
   }, [tabValue, tabRefs]);
 

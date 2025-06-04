@@ -38,26 +38,26 @@ export const CHARTS_OPTIONS = {
         }
     },
     series: [
-        {
-            data: [0],
-            type: 'line',
-            symbol: 'none',
-            lineStyle: {
-                color: '#3662EC',
-                width: 1,
-            },
-            animation: false
-        },
+        // {
+        //     data: [0],
+        //     type: 'line',
+        //     symbol: 'none',
+        //     lineStyle: {
+        //         width: 1,
+        //     },
+        //     animation: false
+        // },
     ],
     animation: false,
     tooltip: {
         trigger: 'axis', // 触发类型，'axis' 表示横轴触发
         // formatter: '({a0}:{b0}, {c0})({b0}:{b1}, {c1})',// 提示框的内容，{b} 表示类目轴的数据，{c} 表示数据值
-        confine: true
+        // confine: true
     },
 }
 
-export function setChartSeries(data: number[], name = "", color = '#3662EC') {
+export function setChartSeries(data: number[], name = "") {
+
     if (data.length <= 0) {
         data = [0]
     }
@@ -67,7 +67,6 @@ export function setChartSeries(data: number[], name = "", color = '#3662EC') {
         symbol: 'none',
         name,
         lineStyle: {
-            color,
             width: 1,
         },
         animation: false

@@ -16,7 +16,7 @@ const RouterConfig: React.FC = () => {
   return (
     <Suspense
       fallback={
-        <PuffLoader className="left-1/2 fixed top-1/2" color="#3662EC" />
+        <PuffLoader className="left-1/2 fixed top-[40%]" color="#3662EC" />
       }
     >
       <RoutersList />

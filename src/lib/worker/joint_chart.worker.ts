@@ -1,7 +1,7 @@
-import { ARM_JOINT_TYPE_UNIT, ChartJointValueMap, isJointParam, MODE_JOINT_TYPE } from "@/pages/Home/options";
+import { ARM_JOINT_TYPE_UNIT, ChartJointValueMap, isJointParam, JointValueKey, MODE_JOINT_TYPE } from "@/pages/Home/options";
 import { OPTION_EMPTY } from "../constant";
 
-type Key = keyof typeof ARM_JOINT_TYPE_UNIT
+
 
 declare interface WorkerPush<T> {
     type: 'clear_joints' | 'set_current_joint' | 'set_joint_model' | 'message' | 'update' | 'set_rad_unit' | 'set_max_dot'
@@ -12,7 +12,8 @@ declare interface WorkerPush<T> {
 let joints: ChartJointValueMap[] = []
 
 // 当前选择的关节
-let curJoint = ''
+let curJoint = OPTION_EMPTY
+let curJointType = 'xarm_target_joint_positions'
 let dates: string[] = []
 // 当前模型关节数量
 let jointModel = 6
@@ -30,13 +31,7 @@ self.onmessage = (event: MessageEvent<WorkerPush<unknown>>) => {
     }
     switch (type) {
         case "message":
-            (Object.keys(value as object) as Key[]).forEach((key) => {
-                // @ts-ignore
-                if (MODE_JOINT_TYPE.includes(key) || key === "response_subtract_data") {
-                    calculateData(key, value[key])
-                }
-            })
-
+            onHandelMessage(value as ChartJointValueMap[])
             break
         case "update":
             if (value) {
@@ -62,21 +57,47 @@ self.onmessage = (event: MessageEvent<WorkerPush<unknown>>) => {
             maxDot = value as number
             break
         case "set_joint_object":
-            setJointObject(value as Key)
+            setJointObject(value as JointValueKey)
             break
         case "post_chart_data":
             postChartData()
             break
+        case "set_joint_type":
+            curJointType = value as JointValueKey
+            break
     }
 };
 
+const onHandelMessage = (data: ChartJointValueMap[]) => {
+    let keys = (Object.keys(data as object) as JointValueKey[])
+    // 过滤掉 'response_subtract_data'
+    const filteredKeys: JointValueKey[] = keys.filter(key => key !== 'response_subtract_data');
+    // 如果存在 'response_subtract_data'，则添加到最后
+    if (keys.includes('response_subtract_data')) {
+        filteredKeys.push('response_subtract_data');
+    }
+    keys = filteredKeys;
+
+    let unit_key: JointValueKey = "xarm_target_joint_positions";
+    keys.forEach((key) => {
+        if (MODE_JOINT_TYPE.includes(key) || key === 'response_subtract_data') {
+            if (key !== 'response_subtract_data') {
+                ARM_JOINT_TYPE_UNIT['response_subtract_data'] = ARM_JOINT_TYPE_UNIT[unit_key]
+            }
+            // @ts-ignore
+            calculateData(key, data[key]);
+            unit_key = key;
+        }
+    });
+}
 // rad换算
 const radsToDegrees = (rad: number) => {
     return (rad * 180.0) / Math.PI
 }
 
+
 // 接收到消息时触发
-const calculateData = (key: Key, data: string[]) => {
+const calculateData = (key: JointValueKey, data: string[]) => {
     // 第一项是时间 截取掉
     const t = data.shift()
     if (key === 'xarm_joint_temperatures') {
@@ -86,7 +107,8 @@ const calculateData = (key: Key, data: string[]) => {
         }
     }
 
-    const units = ARM_JOINT_TYPE_UNIT[key]
+    let units = ARM_JOINT_TYPE_UNIT[key]
+
     for (const i in data.slice(0, jointModel)) {
         // 如果是选中关节就只记录选中关节的数据
         if (curJoint !== OPTION_EMPTY && +curJoint !== +i) {
@@ -119,7 +141,7 @@ const calculateData = (key: Key, data: string[]) => {
 function animate(callback: () => void) {
     clearTimeout(cancelId)
     // 模拟 requestAnimationFrame 的调用，通过 setTimeout
-    return setTimeout(callback, 300); // 60 fps
+    return setTimeout(callback, 250); // 60 fps
 }
 
 /**
@@ -127,15 +149,13 @@ function animate(callback: () => void) {
  */
 const updateMessage = () => {
     openUpdate = true
-
     postChartData()
-
     cancelId = animate(updateMessage)
 }
 
 const postChartData = () => {
     // if (dates.length <= 0) {
-    dates = Array.from({ length: count }, (_, i) => 1 + i + "");
+    dates = Array.from({ length: count || 1 }, (_, i) => 1 + i + "");
     // }
     self.postMessage({
         type: 'joints',
@@ -150,21 +170,28 @@ const setJointModel = (value: number) => {
     jointModel = value > 6 ? 6 : value
 }
 const clearJoints = () => {
+    count = 0
     joints = []
     dates = []
+    setJointObject(curJointType as JointValueKey)
+    postChartData()
 }
 
 
-const setJointObject = (key: Key) => {
+const setJointObject = (key: JointValueKey) => {
     joints = [];
     for (let i = 0; i < jointModel; i++) {
-        joints[i] = {
-            'response_subtract_data': [],
-        } as ChartJointValueMap
+        joints[i] = {} as ChartJointValueMap
         key.split('@').forEach((k) => {
-            joints[i][k as Key] = []
+            joints[i][k as JointValueKey] = []
         })
+        if (key.includes('@')) {
+            joints[i]['response_subtract_data'] = []
+        }
     }
 }
+
+setJointObject(curJointType as JointValueKey)
+
 
 

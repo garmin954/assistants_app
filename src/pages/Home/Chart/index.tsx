@@ -1,11 +1,10 @@
 import React, {
-  useState,
   useMemo,
   forwardRef,
-  useImperativeHandle,
   Suspense,
   useEffect,
   useRef,
+  useCallback,
 } from "react";
 import { Spin } from "antd";
 
@@ -44,10 +43,6 @@ export default forwardRef<RefType, Props>((props, ref) => {
   const { jointOrCoordinateOptions } = useOptions(state);
   const loading = useRef(false);
 
-  // 合成关节图表数据
-  const [joints, setJoints] = useState([]);
-  const [_dates, setDates] = useState([]);
-
   const echartsRef = useRef<{
     [key: string]: any;
   }>({});
@@ -65,58 +60,26 @@ export default forwardRef<RefType, Props>((props, ref) => {
     };
   }, []);
 
-  useEffect(() => {
-    worker.postMessage({
-      type: "post_chart_data",
-  });
-  }, [i18n.language])
-
-  // 设置角度/弧度
-  useEffect(() => {
-    worker.postMessage({ type: "set_rad_unit", value: props.useRad });
-  }, [state.useRad]);
 
   // 设置关节模型
   useEffect(() => {
-    worker.postMessage({
-      type: "set_joint_model",
-      value:
-        ARM_MODEL_JOINT[
-          wsState.xArmInfo.xarm_type as keyof typeof ARM_MODEL_JOINT
-        ] || 6,
-    });
+    if (wsState.xArmInfo.xarm_type) {
+      worker.postMessage({
+        type: "set_joint_model",
+        value:
+          ARM_MODEL_JOINT[
+            wsState.xArmInfo.xarm_type as keyof typeof ARM_MODEL_JOINT
+          ] || 6,
+      });  
+    }
+    
   }, [wsState.xArmInfo.xarm_type]);
 
-  // 设置当前类型
-  useEffect(() => {
-    worker.postMessage({ type: "set_current_joint", value: state.curJoint });
-  }, [state.curJoint]);
+   const getChartData = useCallback(() =>{
+    worker.postMessage({ type: "post_chart_data", value: null });
+  },[])
 
-  function clearChartData(load = true) {
-    if (load) {
-      setTimeout(() => {
-        loading.current = true;
-      }, 0);
-    }
-    worker.postMessage({ type: "clear_joints", value: null });
-    setJoints([]);
-    setDates([]);
-  }
-
-  useImperativeHandle(ref, () => ({
-    clearChartData,
-    TEST_GET_JOINTS: () => {
-      console.log(joints);
-    },
-  }));
-
-  // 数据加载
-  useEffect(() => {
-    if (joints.length > 0 && loading.current) {
-      loading.current = false;
-    }
-  }, [joints]);
-
+ 
   // 生成图表数量
   const charts = useMemo(() => {
     if (state.filter_field.joint !== OPTION_EMPTY) {
@@ -140,6 +103,7 @@ export default forwardRef<RefType, Props>((props, ref) => {
           <JointChart
             index={charts.length === 1 ? +state.filter_field.joint : index}
             key={`chart-${index}`}
+            getChartData={getChartData}
             ref={(r: any) =>
               (echartsRef.current[
                 charts.length === 1 ? +state.filter_field.joint : index

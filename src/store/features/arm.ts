@@ -27,7 +27,7 @@ export const setArmStateApis = createAsyncThunk<Response<unknown>, { cmd: string
     let data = {}
     let cmd = args.cmd
     if (cmd.startsWith('send_cmd')) {
-        let res = cmd.split("&")
+        const res = cmd.split("&")
         cmd = res[0]
         data = { cmd: res[1] }
     }

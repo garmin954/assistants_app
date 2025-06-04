@@ -7,12 +7,12 @@ export default function useUpdater() {
     const state = useSelector<RootState, UpdaterState>(state => state.updater);
     const dispatch = useDispatch<RootDispatch>();
 
-    let isBeta = false
+    const isBeta = false
     async function onCheckUpdater() {
         switch (state.step) {
             case UPDATER_STEP.NORMAL:
             case UPDATER_STEP.CHECK:
-                dispatch(checkUpdater(isBeta)).then(({ payload }) => {
+                dispatch(checkUpdater(isBeta)).then(({ payload }: any) => {
                     // 有新版本 弹出更新信息
                     if (payload.code === 0 && !payload.data?.is_latest) {
                         dispatch(openUpdateDialog(true));
