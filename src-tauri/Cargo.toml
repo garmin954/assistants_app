@@ -1,6 +1,6 @@
 [package]
 name = "UFACTORY调参工具"
-version = "1.0.3"
+version = "1.0.4"
 description = "A Tauri App"
 authors = ["Garmin"]
 edition = "2021"
