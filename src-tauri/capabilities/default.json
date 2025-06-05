@@ -52,6 +52,7 @@
     "commands:allow-set-beta-updater",
     "commands:allow-set-stable-updater",
     "dialog:allow-save",
-    "dialog:default"
+    "dialog:default",
+    "core:window:allow-set-title"
   ]
 }

@@ -19,7 +19,7 @@ let dates: string[] = []
 let jointModel = 6
 let cancelId = 0
 let openUpdate = false
-let isRad = true
+let isRad = false
 let maxDot = 6000
 let count = 0
 
@@ -51,7 +51,7 @@ self.onmessage = (event: MessageEvent<WorkerPush<unknown>>) => {
             setJointModel(value as number)
             break
         case "set_rad_unit":
-            isRad = value as boolean
+            isRad = +value === 1
             break
         case "set_max_dot":
             maxDot = value as number

@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { save } from "@tauri-apps/plugin-dialog";
 import { downloadDir, join, basename, dirname } from '@tauri-apps/api/path';
+import dayjs from "dayjs";
 
 import { Response, ws } from "@/pages/Layouts/SocketState/ws";
 import { RootState } from "..";
@@ -95,8 +96,9 @@ export const switchObserveState = createAsyncThunk<Response<unknown>>('assistant
 export const downloadObserverFile = createAsyncThunk<Response<unknown>>('assistants/downloadFile', async () => {
     return new Promise(async (resolve) => {
         try {
+            const fd = dayjs().format('YYYY_MM_DD_HHmmss')
             const dp = await downloadDir();
-            const fn = `record_data.csv`
+            const fn = `record_data_${fd}.csv`
             const defaultPath = await join(dp, fn)
             save({
                 title: i18n.t('saveObservationData'),
@@ -168,6 +170,7 @@ const slice = createSlice({
             // 设置角度/弧度
             if (unit !== state.filter_field.unit) {
                 worker.postMessage({ type: "set_rad_unit", value: unit });
+                worker.postMessage({ type: "clear_joints", value: null });
             }
 
             if (joint !== state.filter_field.joint) {

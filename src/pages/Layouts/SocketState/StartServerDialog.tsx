@@ -12,6 +12,7 @@ import { sleep } from "@/lib/utils";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { AppState } from "@/store/features/app";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   className?: string;
@@ -20,6 +21,7 @@ type Props = {
 };
 
 export default function StartServerDialog(_props: Props) {
+  const {t} = useTranslation();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const state = useSelector<RootState, AppState>((state) => state.app);
@@ -52,10 +54,10 @@ export default function StartServerDialog(_props: Props) {
       <DialogContent className="sm:max-w-[325px]">
         <DialogHeader>
           <DialogTitle className="text-center uf-font-regular select-none">
-            当前服务未开启
+            {t("start_server_tip")}
           </DialogTitle>
         </DialogHeader>
-        <div className="h-[15rem] my-4">
+        <div className="h-[10rem] my-4">
           <img src={ServerFailPng} className="h-full mx-auto select-none" />
         </div>
         <div className="flex justify-center gap-[3rem]">
@@ -65,7 +67,7 @@ export default function StartServerDialog(_props: Props) {
             className="min-w-[8rem]"
             loading={loading}
           >
-            开启服务
+            {t("start_server")}
           </Button>
         </div>
       </DialogContent>

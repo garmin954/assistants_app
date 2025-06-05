@@ -14,7 +14,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useDispatch, useSelector } from "react-redux";
 import { RootDispatch, RootState } from "@/store";
-import { CSSTransition } from "react-transition-group";
 import {
   AssistantsState,
   downloadObserverFile,
@@ -290,24 +289,19 @@ export default function FilterCriteria() {
             {t("recordCSV")}
           </Label>
         </div>
-        <CSSTransition
-          in={
-            ["2", "3"].includes(state.filter_field.type) && state.show_download_btn
-            // &&
-            // state.server_state
-          }
-          timeout={100}
-          classNames="button"
-          unmountOnExit
-        >
-          <Button
+        
+        {
+          ["2", "3"].includes(state.filter_field.type) && state.show_download_btn? (
+            <Button
             onClick={downloadFile}
             loading={downloadLoading}
             disabled={!state.server_state}
           >
             {t("download")}
           </Button>
-        </CSSTransition>
+          ): null
+        }
+     
         <Button
           className="min-w-[4.5rem] w-[6rem]"
           disabled={

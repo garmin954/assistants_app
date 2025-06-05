@@ -19,6 +19,13 @@
     "compare": "对比",
     "differential": "差值",
     "response_subtract_data": "差值",
+    "start_server_tip": "当前服务未开启",
+    "start_server": "开启服务",
+    "version_title": "版本更新",
+    "version_install": "立即下载",
+    "network_speed": "网速",
+    "install_tips": "安装包下载完成，点击立即安装",
+    "install_now": "立即安装",
     "jointVelocityItems": [
         {
             "value": "xarm_target_joint_positions",

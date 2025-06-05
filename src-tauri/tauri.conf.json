@@ -40,9 +40,6 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": {
-      "../src/assets/images/": "resources/images"
-    },
     "externalBin": [
       "./binaries/xarmparam"
     ]

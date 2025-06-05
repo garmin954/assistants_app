@@ -24,8 +24,7 @@ export const CHARTS_OPTIONS = {
         data: [0],
         animation: false,
         axisLabel: {
-            interval: 199, // 控制 x 轴标签的显示间隔，显示第 1、200、400、600、800 和 1000 个标签
-            hideOverlap: true
+            interval: 'auto',
         },
         axisLine: {
             show: true,  // 显示轴线
@@ -34,29 +33,25 @@ export const CHARTS_OPTIONS = {
     },
     yAxis: {
         type: 'value',
-        // offset: '20%',
+        min: 'dataMin',
+        max: 'dataMax',
         splitLine: {
             lineStyle: {
-                // color: "#6e6d6d"
             }
         }
     },
-    series: [
-        // {
-        //     data: [0],
-        //     type: 'line',
-        //     symbol: 'none',
-        //     lineStyle: {
-        //         width: 1,
-        //     },
-        //     animation: false
-        // },
-    ],
     animation: false,
     tooltip: {
         trigger: 'axis', // 触发类型，'axis' 表示横轴触发
-        triggerOn: "click",
+        // triggerOn: "click",
+        showContent: false,
+        formatter: function () {
+            return ``;
+        }
     },
+    markPoint: {},
+    series: [
+    ],
 }
 
 export function setChartSeries(data: number[], name = "") {
@@ -67,11 +62,20 @@ export function setChartSeries(data: number[], name = "") {
     return {
         data,
         type: 'line',
-        symbol: 'none',
         name,
         lineStyle: {
             width: 1,
         },
-        animation: false
+        animation: false,
+        smooth: true,
+        symbol: 'circle',  // 保留符号
+        symbolSize: 5,     // 设置符号大小
+        itemStyle: {
+            normal: {
+                opacity: 0,
+            },
+            borderWidth: 1
+        },
+        seriesLayoutBy: 'row',
     }
 }

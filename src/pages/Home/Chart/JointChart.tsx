@@ -12,11 +12,13 @@ import {
   GridComponent,
   DataZoomInsideComponent,
   TooltipComponent,
+  LegendComponent , 
+  GraphicComponent,
+  MarkPointComponent 
 } from "echarts/components";
 import { LineChart } from "echarts/charts";
 import { UniversalTransition } from "echarts/features";
 import { CanvasRenderer } from "echarts/renderers";
-import { LegendComponent } from 'echarts/components';
 import {
   ARM_JOINT_TYPE_UNIT,
   ChartJointValueMap,
@@ -38,7 +40,9 @@ echarts.use([
   UniversalTransition,
   DataZoomInsideComponent,
   TooltipComponent,
-  LegendComponent
+  LegendComponent,
+  GraphicComponent,
+  MarkPointComponent 
 ]);
 
 interface Props {
@@ -66,15 +70,91 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
   // 初始化图表
   useEffect(() => {
     if (echartsRef.current) {
-      chart.current = echarts.init(echartsRef.current);
+      chart.current = echarts.init(echartsRef.current,null, {
+        renderer: 'canvas',
+        useDirtyRect: false
+      });
+      // 确认图表实例是否正确初始化
+      // console.log('chart.current initialized:', chart.current); 
       setCharts(true);
-      
+      if (chart.current) {
+        chart.current.on("click", openSeriesDot);
+        // 注册缩放和拖拽事件
+        chart.current.on('dataZoom', updateMarkPoints);
+      }
     }
     return () => {
-      chart.current && chart.current.dispose();
+      if (chart.current) {
+        chart.current.off("click", openSeriesDot);
+        chart.current.off('dataZoom', updateMarkPoints);
+        chart.current.dispose();  
+      }
     };
   }, [echartsRef.current]);
+  const selectedPoints = useRef<{ key:string, value: string; name: string, coord:string[] }[][]>([[],[]]);
+  function openSeriesDot(params:  echarts.ECElementEvent) {
+    const index: 0|1 = params.seriesIndex as 0|1 ?? 0;
+    const key = `${params.seriesIndex}-${params.name}`;
+    console.log('params==>', params);
+    if (params.componentType === 'series' || params.componentType === 'markPoint') {
+      const pos = selectedPoints.current[index].findIndex(p => p.key === key);
+      console.log('selectedPoints.current==>', selectedPoints.current, key, pos);
+      // 如果已选中，则取消选择
+      if (pos > -1) {
+        selectedPoints.current[index].splice(pos, 1);
+      }
+      // 否则添加到选中列表
+      else {
+        selectedPoints.current[index].push({
+          key,
+          name: params.name,
+          value: params.value as string,
+          coord: [params.name, params.value+""] // 存储坐标信息
+        });
+      }
 
+      // 更新markPoint数据
+      updateMarkPoints();
+    }
+  }
+
+   // 更新点位标记
+   function updateMarkPoints() {
+    const config:any[] = [];
+    selectedPoints.current.forEach((item, index)=>{
+      const markPointData = item.map(point => ({
+        name: point.name,
+        coord: point.coord,
+        value: point.value,
+        symbol: "circle",
+        symbolSize: 10,
+        animation: false,
+        label: {
+          show: true,
+          position: 'insideLeft',
+          backgroundColor: 'rgba(255,255,255,0.9)',
+          color: '#333',
+          borderColor: '#ccc',
+          borderWidth: 1,
+          borderRadius: 4,
+          padding: [8, 12],
+          formatter: `{b},{c}`,
+          distance: 10, // 与点的距离
+          shadowBlur: 10,
+          shadowColor: 'rgba(0,0,0,0.1)'
+        }
+      }));
+      config[index] = {
+        markPoint: {
+          data: markPointData
+        }
+      }
+    })
+      // 更新图表
+      chart.current?.setOption({
+        series: config
+      });
+  }
   // 缩放
   const size = useSize(enlargeRef);
   useEffect(() => {
@@ -100,8 +180,6 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
     return data;
   }, [i18n.language])
 
-
-
   // 更新数据
   function updateChartData(data: ChartJointValueMap, label: number[]) {
     const options = deepClone(CHARTS_OPTIONS);
@@ -113,7 +191,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
       // };
     }
     options.xAxis.data = label;
-    options.xAxis.axisLabel.interval = Math.ceil(label.length / 6);
+    // options.xAxis.axisLabel.interval = Math.ceil(label.length / 6);
     options.series = [];
     let index = 0;
     const val:string[] = [];
@@ -125,7 +203,6 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
           key === "response_subtract_data") ||
         state.filter_field.mode === "observe"
       ) {
-        
         const d = data[key]!;
         (options.series as any[]).push(setChartSeries(d, chartNameData[key]));
         index++
@@ -162,6 +239,10 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
     }
     return u;
   }, [props.index, state.filter_field.jointType, state.filter_field.unit]);
+
+  useEffect(() => {
+    selectedPoints.current = [[],[]];
+  }, [state.filter_field.jointType, state.filter_field.compare, state.filter_field.mode, state.filter_field.unit]);
 
   useImperativeHandle(ref, () => ({ update: updateChartData }));
   return (

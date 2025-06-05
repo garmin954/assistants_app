@@ -9,6 +9,7 @@ import {
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import "github-markdown-css/github-markdown.css";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   children?: React.ReactNode;
@@ -21,6 +22,7 @@ type Props = {
 };
 
 export default function ReleaseDescDialog(props: Props) {
+  const {t} = useTranslation();
   const [open, setOpen] = useState(false);
 
   function close() {
@@ -45,7 +47,7 @@ export default function ReleaseDescDialog(props: Props) {
         </DialogClose>
         <DialogHeader>
           <DialogTitle className="text-center">
-            {`v${props.version} 版本更新信息`}
+            {t("version_title")}
           </DialogTitle>
         </DialogHeader>
         <div
@@ -64,7 +66,7 @@ export default function ReleaseDescDialog(props: Props) {
             }}
             className="min-w-[8rem]"
           >
-            立即下载
+            {t("version_install")}
           </Button>
         </div>
       </DialogContent>

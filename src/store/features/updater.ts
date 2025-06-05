@@ -152,9 +152,9 @@ const slice = createSlice({
             console.log('up', up);
 
             if (code === 0 && data?.is_latest) {
-                toast.info("当前已经是最新版本", {
-                    position: "top-center",
-                });
+                // toast.info("当前已经是最新版本", {
+                //     position: "top-center",
+                // });
                 state.step = UPDATER_STEP.NORMAL
                 return;
             }

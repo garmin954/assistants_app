@@ -12,9 +12,11 @@ import { RootDispatch, RootState } from "@/store";
 import { installApp, UpdaterState } from "@/store/features/updater";
 import { useThrottleEffect } from "ahooks";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function DownloadProgress() {
+  const {t} = useTranslation();
   const state = useSelector<RootState, UpdaterState>((state) => state.updater);
   const dispatch = useDispatch<RootDispatch>();
 
@@ -47,14 +49,16 @@ export default function DownloadProgress() {
     <Dialog open={state.download.showDialog}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-center">软件更新</DialogTitle>
+          <DialogTitle className="text-center">
+            {t("version_title")}
+          </DialogTitle>
         </DialogHeader>
 
         {state.step === UPDATER_STEP.DOWNLOAD ? (
           <div className="flex flex-col gap-4 py-[3rem] h-[10rem] box-border">
             <Progress className="h-[1.5rem]" value={state.download.progress} />
             <div className="flex justify-between uf-font-regular">
-              <span>网速：{speed}</span>
+              <span>{t('network_speed')}：{speed}</span>
               <span>
                 {download}/{total}
               </span>
@@ -63,14 +67,15 @@ export default function DownloadProgress() {
         ) : (
           <div className="flex justify-between flex-col gap-4 items-center h-[10rem]">
             <div className="text-center text-2xl mt-8">
-              安装包下载完成，点击立即安装
+              
+              {t("install_tips")}
             </div>
             <Button
               onClick={() => {
                 dispatch(installApp());
               }}
             >
-              立即安装
+              {t('install_now')}
             </Button>
           </div>
         )}
