@@ -26,6 +26,7 @@
     "network_speed": "Network Speed",
     "install_tips": "The installation package is downloaded, click to install immediately",
     "install_now": "Install Now",
+    "operation_failed": "Operation failed",
     "jointVelocityItems": [
         {
             "value": "xarm_target_joint_positions",

@@ -3,9 +3,9 @@ export const CHARTS_OPTIONS = {
     renderer: 'canvas',
     grid: {
         top: '5%',    // 上边距
-        bottom: '20%', // 下边距
-        left: '40',   // 左边距
-        right: '10'   // 右边距
+        bottom: '50', // 下边距
+        left: '60',   // 左边距
+        right: '20'   // 右边距
     },
     legend: {
         show: true,

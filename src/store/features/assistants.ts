@@ -230,6 +230,8 @@ const slice = createSlice({
             if (code === 0) {
                 console.log("Observe 开始")
                 state.reporting = data.target === 'start'
+            } else {
+                toast.error(i18n.t("operation_failed"))
             }
 
             if (!state.reporting && ["2", "3"].includes(state.filter_field.type)) {

@@ -2,7 +2,6 @@ import React, {
   useEffect,
   useRef,
   useMemo,
-  useState,
   useImperativeHandle,
 } from "react";
 import { useSize } from "ahooks";
@@ -64,7 +63,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
   // 图表实例
   const chart = useRef<echarts.ECharts>();
   // 当前值
-  const [curVal, setCurVal] = useState<string | null>("0");
+  // const [curVal, setCurVal] = useState<string | null>("0");
   // 图表
   const echartsRef = useRef<HTMLDivElement>(null);
   // 初始化图表
@@ -165,7 +164,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
   function setCharts(set = false) {
     if (set) {
       chart.current?.setOption(CHARTS_OPTIONS);
-      setCurVal("0");
+      // setCurVal("0");
       props.getChartData();
     }
     chart.current?.resize();
@@ -211,7 +210,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
         }
       }
     });
-    setCurVal(val.join("/"));      
+    // setCurVal(val.join("/"));      
     chart.current?.setOption(options, {
       // replaceMerge: ['xAxis', 'series'],
       notMerge: true, // 不合并配置
@@ -229,16 +228,16 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
   }, [props.index, state.filter_field.jointType]);
 
   // 单位
-  const unitTxt = useMemo(() => {
-    let u =
-      ARM_JOINT_TYPE_UNIT[
-        state.filter_field.jointType as keyof typeof ARM_JOINT_TYPE_UNIT
-      ][props.index];
-    if (+state.filter_field.unit === 0 && u.includes("rad")) {
-      u = u.replace("rad", "°");
-    }
-    return u;
-  }, [props.index, state.filter_field.jointType, state.filter_field.unit]);
+  // const unitTxt = useMemo(() => {
+  //   let u =
+  //     ARM_JOINT_TYPE_UNIT[
+  //       state.filter_field.jointType as keyof typeof ARM_JOINT_TYPE_UNIT
+  //     ][props.index];
+  //   if (+state.filter_field.unit === 0 && u.includes("rad")) {
+  //     u = u.replace("rad", "°");
+  //   }
+  //   return u;
+  // }, [props.index, state.filter_field.jointType, state.filter_field.unit]);
 
   useEffect(() => {
     selectedPoints.current = [[],[]];
@@ -248,11 +247,13 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
   return (
     <div
       ref={enlargeRef}
-      className="bg-card rounded-lg shadow-sm px-6 pt-6 pb-12"
+      className="bg-card rounded-lg shadow-sm pt-6 pb-12"
     >
       <div className="chart-unit  uf-font-medium flex justify-between">
-        <div className="ml-0 text-lg">{title}</div>
-        <div className="right">{(curVal || 0) + " " + unitTxt}</div>
+        <div className="ml-12 text-lg">{title}</div>
+        <div className="right">
+          {/* {(curVal || 0) + " " + unitTxt} */}
+        </div>
       </div>
       <div style={{ height: "100%", width: "100%" }} ref={echartsRef}></div>
     </div>
