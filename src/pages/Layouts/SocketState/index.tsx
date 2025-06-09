@@ -13,6 +13,7 @@ import { setRoboticArmSystemInformation } from "@/store/features/ws";
 import { switchObserveState } from "@/store/features/assistants";
 
 let url = `127.0.0.1:18355`;
+// let url = `192.168.1.135:18355`;
 // 容错
 if (import.meta.env.MODE !== "development") {
   url = `127.0.0.1:18355`;

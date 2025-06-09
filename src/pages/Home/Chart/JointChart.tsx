@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo, useImperativeHandle } from "react";
-import { useSize } from "ahooks";
+import { useSize, useThrottleFn } from "ahooks";
 
 import * as echarts from "echarts/core";
 import {
@@ -251,7 +251,11 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
     state.reporting,
   ]);
 
-  useImperativeHandle(ref, () => ({ update: updateChartData }));
+  const { run: throttledUpdate } = useThrottleFn(updateChartData, {
+    wait: 300,
+    leading: true,
+  });
+  useImperativeHandle(ref, () => ({ update: throttledUpdate }));
   return (
     <div ref={enlargeRef} className="bg-card rounded-lg shadow-sm pt-6 pb-12">
       <div className="chart-unit  uf-font-medium flex justify-between">

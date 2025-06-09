@@ -1,5 +1,7 @@
 export const CHARTS_OPTIONS = {
     useWorker: true,
+    progressive: 500,           // 渐进式渲染，每帧渲染点数
+    progressiveThreshold: 3000, // 超过该阈值时启用渐进式渲染
     renderer: 'canvas',
     grid: {
         top: '5%',    // 上边距
@@ -72,7 +74,7 @@ export function setChartSeries(data: number[], name = "") {
             width: 1,
         },
         animation: false,
-        smooth: true,
+        smooth: data.length < 1000,
         symbol: 'circle',  // 保留符号
         symbolSize: 5,     // 设置符号大小
         itemStyle: {
