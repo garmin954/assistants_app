@@ -1,9 +1,4 @@
-import React, {
-  useEffect,
-  useRef,
-  useMemo,
-  useImperativeHandle,
-} from "react";
+import React, { useEffect, useRef, useMemo, useImperativeHandle } from "react";
 import { useSize } from "ahooks";
 
 import * as echarts from "echarts/core";
@@ -11,9 +6,9 @@ import {
   GridComponent,
   DataZoomInsideComponent,
   TooltipComponent,
-  LegendComponent , 
+  LegendComponent,
   GraphicComponent,
-  MarkPointComponent 
+  MarkPointComponent,
 } from "echarts/components";
 import { LineChart } from "echarts/charts";
 import { UniversalTransition } from "echarts/features";
@@ -41,7 +36,7 @@ echarts.use([
   TooltipComponent,
   LegendComponent,
   GraphicComponent,
-  MarkPointComponent 
+  MarkPointComponent,
 ]);
 
 interface Props {
@@ -54,7 +49,7 @@ type RefType = {
 };
 
 export default React.forwardRef<RefType, Props>((props, ref) => {
-  const {t, i18n} = useTranslation();
+  const { t, i18n } = useTranslation();
   const enlargeRef = useRef(null);
   const state = useSelector<RootState, AssistantsState>(
     (state) => state.assistants
@@ -69,35 +64,38 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
   // 初始化图表
   useEffect(() => {
     if (echartsRef.current) {
-      chart.current = echarts.init(echartsRef.current,null, {
-        renderer: 'canvas',
-        useDirtyRect: false
+      chart.current = echarts.init(echartsRef.current, null, {
+        renderer: "canvas",
+        useDirtyRect: false,
       });
       // 确认图表实例是否正确初始化
-      // console.log('chart.current initialized:', chart.current); 
+      // console.log('chart.current initialized:', chart.current);
       setCharts(true);
       if (chart.current) {
         chart.current.on("click", openSeriesDot);
         // 注册缩放和拖拽事件
-        chart.current.on('dataZoom', updateMarkPoints);
+        chart.current.on("dataZoom", updateMarkPoints);
       }
     }
     return () => {
       if (chart.current) {
         chart.current.off("click", openSeriesDot);
-        chart.current.off('dataZoom', updateMarkPoints);
-        chart.current.dispose();  
+        chart.current.off("dataZoom", updateMarkPoints);
+        chart.current.dispose();
       }
     };
   }, [echartsRef.current]);
-  const selectedPoints = useRef<{ key:string, value: string; name: string, coord:string[] }[][]>([[],[]]);
-  function openSeriesDot(params:  echarts.ECElementEvent) {
-    const index: 0|1 = params.seriesIndex as 0|1 ?? 0;
+  const selectedPoints = useRef<
+    { key: string; value: string; name: string; coord: string[] }[][]
+  >([[], []]);
+  function openSeriesDot(params: echarts.ECElementEvent) {
+    const index: 0 | 1 = (params.seriesIndex as 0 | 1) ?? 0;
     const key = `${params.seriesIndex}-${params.name}`;
-    console.log('params==>', params);
-    if (params.componentType === 'series' || params.componentType === 'markPoint') {
-      const pos = selectedPoints.current[index].findIndex(p => p.key === key);
-      console.log('selectedPoints.current==>', selectedPoints.current, key, pos);
+    if (
+      params.componentType === "series" ||
+      params.componentType === "markPoint"
+    ) {
+      const pos = selectedPoints.current[index].findIndex((p) => p.key === key);
       // 如果已选中，则取消选择
       if (pos > -1) {
         selectedPoints.current[index].splice(pos, 1);
@@ -108,7 +106,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
           key,
           name: params.name,
           value: params.value as string,
-          coord: [params.name, params.value+""] // 存储坐标信息
+          coord: [params.name, params.value + ""], // 存储坐标信息
         });
       }
 
@@ -117,11 +115,11 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
     }
   }
 
-   // 更新点位标记
-   function updateMarkPoints() {
-    const config:any[] = [];
-    selectedPoints.current.forEach((item, index)=>{
-      const markPointData = item.map(point => ({
+  // 更新点位标记
+  function updateMarkPoints() {
+    const config: any[] = [];
+    selectedPoints.current.forEach((item, index) => {
+      const markPointData = item.map((point) => ({
         name: point.name,
         coord: point.coord,
         value: point.value,
@@ -130,29 +128,29 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
         animation: false,
         label: {
           show: true,
-          position: 'insideLeft',
-          backgroundColor: 'rgba(255,255,255,0.9)',
-          color: '#333',
-          borderColor: '#ccc',
+          position: "insideLeft",
+          backgroundColor: "rgba(255,255,255,0.9)",
+          color: "#333",
+          borderColor: "#ccc",
           borderWidth: 1,
           borderRadius: 4,
           padding: [8, 12],
           formatter: `{b},{c}`,
           distance: 10, // 与点的距离
           shadowBlur: 10,
-          shadowColor: 'rgba(0,0,0,0.1)'
-        }
+          shadowColor: "rgba(0,0,0,0.1)",
+        },
       }));
       config[index] = {
         markPoint: {
-          data: markPointData
-        }
-      }
-    })
-      // 更新图表
-      chart.current?.setOption({
-        series: config
-      });
+          data: markPointData,
+        },
+      };
+    });
+    // 更新图表
+    chart.current?.setOption({
+      series: config,
+    });
   }
   // 缩放
   const size = useSize(enlargeRef);
@@ -171,13 +169,17 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
   }
 
   const chartNameData = useMemo(() => {
-    const data: Partial<Record<JointValueKey, string>> = {"response_subtract_data": t("response_subtract_data")};
-    (t("jointVelocityItems",{returnObjects: true}) as DefaultOptionType[]).forEach((v) => {
+    const data: Partial<Record<JointValueKey, string>> = {
+      response_subtract_data: t("response_subtract_data"),
+    };
+    (
+      t("jointVelocityItems", { returnObjects: true }) as DefaultOptionType[]
+    ).forEach((v) => {
       data[v.value as JointValueKey] = v.label;
     });
 
     return data;
-  }, [i18n.language])
+  }, [i18n.language]);
 
   // 更新数据
   function updateChartData(data: ChartJointValueMap, label: number[]) {
@@ -193,7 +195,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
     // options.xAxis.axisLabel.interval = Math.ceil(label.length / 6);
     options.series = [];
     let index = 0;
-    const val:string[] = [];
+    const val: string[] = [];
     (Object.keys(data) as JointValueKey[]).forEach((key) => {
       if (
         (state.filter_field.compare === "1" &&
@@ -204,13 +206,13 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
       ) {
         const d = data[key]!;
         (options.series as any[]).push(setChartSeries(d, chartNameData[key]));
-        index++
+        index++;
         if (d[d.length - 1] !== undefined) {
           val.push(d[d.length - 1].toString());
         }
       }
     });
-    // setCurVal(val.join("/"));      
+    // setCurVal(val.join("/"));
     chart.current?.setOption(options, {
       // replaceMerge: ['xAxis', 'series'],
       notMerge: true, // 不合并配置
@@ -240,20 +242,21 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
   // }, [props.index, state.filter_field.jointType, state.filter_field.unit]);
 
   useEffect(() => {
-    selectedPoints.current = [[],[]];
-  }, [state.filter_field.jointType, state.filter_field.compare, state.filter_field.mode, state.filter_field.unit]);
+    selectedPoints.current = [[], []];
+  }, [
+    state.filter_field.jointType,
+    state.filter_field.compare,
+    state.filter_field.mode,
+    state.filter_field.unit,
+    state.reporting,
+  ]);
 
   useImperativeHandle(ref, () => ({ update: updateChartData }));
   return (
-    <div
-      ref={enlargeRef}
-      className="bg-card rounded-lg shadow-sm pt-6 pb-12"
-    >
+    <div ref={enlargeRef} className="bg-card rounded-lg shadow-sm pt-6 pb-12">
       <div className="chart-unit  uf-font-medium flex justify-between">
         <div className="ml-12 text-lg">{title}</div>
-        <div className="right">
-          {/* {(curVal || 0) + " " + unitTxt} */}
-        </div>
+        <div className="right">{/* {(curVal || 0) + " " + unitTxt} */}</div>
       </div>
       <div style={{ height: "100%", width: "100%" }} ref={echartsRef}></div>
     </div>

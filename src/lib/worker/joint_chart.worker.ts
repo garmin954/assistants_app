@@ -141,7 +141,7 @@ const calculateData = (key: JointValueKey, data: string[]) => {
 function animate(callback: () => void) {
     clearTimeout(cancelId)
     // 模拟 requestAnimationFrame 的调用，通过 setTimeout
-    return setTimeout(callback, 250); // 60 fps
+    return setTimeout(callback, 200); // 60 fps
 }
 
 /**

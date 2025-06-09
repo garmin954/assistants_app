@@ -18,7 +18,7 @@ export const SELECTED_FIELD = {
     hz: '250',
     type: "0",
     unit: '0',
-    time: 10,
+    time: 100,
     mode: 'observe',
     compare: "1",
 }

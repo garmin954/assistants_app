@@ -38,6 +38,11 @@ export const CHARTS_OPTIONS = {
         splitLine: {
             lineStyle: {
             }
+        },
+        axisLabel: {
+            formatter: function (value: number) {
+                return value.toFixed(3);
+            }
         }
     },
     animation: false,
