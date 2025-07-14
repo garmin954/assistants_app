@@ -98,7 +98,7 @@ export default function ServiceUpdater(props: Props) {
 
   const { run: handleUpdaterService, loading } = useRequest(
     async () => {
-      return await invoke("plugin:commands|updater_service", {
+      return await invoke("updater_service", {
         path: updaterPath,
       });
     },

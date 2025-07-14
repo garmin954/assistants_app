@@ -8,7 +8,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "react-i18next";
 import { SHOW_RAD_TYPE } from "../options";
-import { useMemo  } from "react";
+import { useMemo } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -53,8 +53,6 @@ export default function FilterCriteria() {
       } else if (op.length === 1) {
         type = op[0].toString();
       }
-      console.log(op, type);
-
       value.type = type;
     }
     return dispatch(setSelectedField({ ...state.filter_field, ...value }));
@@ -115,27 +113,28 @@ export default function FilterCriteria() {
       debounceLeading: true,
     }
   );
- 
 
   // 禁用状态
   const disabledState = useMemo(() => {
     return state.reporting || !state.server_state;
   }, [state.reporting, state.server_state]);
 
-  // jointType title
+  // observe_type title
   const jointTypeTitle = useMemo(() => {
     const { label } = observeTypeOptions.find((item) => {
-      return item.value === state.filter_field.jointType;
+      return item.value === state.filter_field.observe_type;
     }) ?? { label: "" };
     return label;
-  }, [state.filter_field.jointType, i18n.language]);
+  }, [state.filter_field.observe_type, i18n.language]);
 
   return (
     <div className="flex justify-between">
-      <div className={cn(
-        "flex justify-start gap-5",
-        i18n.language === "en-US" && " w-[60%] overflow-x-auto"
-      )}>
+      <div
+        className={cn(
+          "flex justify-start gap-5",
+          i18n.language === "en-US" && " w-[60%] overflow-x-auto"
+        )}
+      >
         {/* 观测分析 */}
         <Select
           value={state.filter_field.mode}
@@ -156,16 +155,19 @@ export default function FilterCriteria() {
 
         {/* 观测分析类型 */}
         <Select
-          value={state.filter_field.jointType}
+          value={state.filter_field.observe_type}
           onValueChange={(value) =>
-            setFormValue({ jointType: value, joint: OPTION_EMPTY })
+            setFormValue({ observe_type: value, joint_dir: OPTION_EMPTY })
           }
           disabled={disabledState}
         >
-          <SelectTrigger className="w-fit max-w-[12rem] bg-white" title={jointTypeTitle}>
+          <SelectTrigger
+            className="w-fit max-w-[12rem] bg-white"
+            title={jointTypeTitle}
+          >
             <SelectValue
               className="text-start"
-              placeholder={state.filter_field.jointType}
+              placeholder={state.filter_field.observe_type}
             ></SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -179,12 +181,14 @@ export default function FilterCriteria() {
 
         {/* 关节或者坐标 */}
         <Select
-          value={state.filter_field.joint}
-          onValueChange={(value) => setFormValue({ joint: value })}
+          value={state.filter_field.joint_dir}
+          onValueChange={(value) => setFormValue({ joint_dir: value })}
           disabled={disabledState}
         >
           <SelectTrigger className="w-fit max-w-[10rem] min-w-[7rem] bg-white">
-            <SelectValue placeholder={state.filter_field.joint}></SelectValue>
+            <SelectValue
+              placeholder={state.filter_field.joint_dir}
+            ></SelectValue>
           </SelectTrigger>
           <SelectContent>
             {jointOrCoordinateOptions.map((item) => (
@@ -214,7 +218,7 @@ export default function FilterCriteria() {
         </Select>
 
         {/* 单位 */}
-        {SHOW_RAD_TYPE.includes(state.filter_field.jointType) ? (
+        {SHOW_RAD_TYPE.includes(state.filter_field.observe_type) ? (
           <Select
             value={state.filter_field.unit}
             onValueChange={(value) => setFormValue({ unit: value })}
@@ -256,7 +260,7 @@ export default function FilterCriteria() {
         </div>
 
         {/* 观测分析类型 */}
-        {state.filter_field.mode !== "observe" ? (
+        {state.filter_field.mode !== "observer" ? (
           <SwitchButton
             className="h-[3.11rem] w-fit rounded-md"
             disabled={!state.server_state}
@@ -289,19 +293,18 @@ export default function FilterCriteria() {
             {t("recordCSV")}
           </Label>
         </div>
-        
-        {
-          ["2", "3"].includes(state.filter_field.type) && state.show_download_btn? (
-            <Button
+
+        {["2", "3"].includes(state.filter_field.type) &&
+        state.show_download_btn ? (
+          <Button
             onClick={downloadFile}
             loading={downloadLoading}
             disabled={!state.server_state}
           >
             {t("download")}
           </Button>
-          ): null
-        }
-     
+        ) : null}
+
         <Button
           className="min-w-[4.5rem] w-[6rem]"
           disabled={

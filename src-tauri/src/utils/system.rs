@@ -112,6 +112,7 @@ pub fn open_server(app_path: PathBuf, server_name: &str) -> Option<std::process:
     Some(child)
 }
 
+#[allow(dead_code)]
 pub fn app_path_join<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
 ) -> Result<PathBuf, Box<dyn Error>> {
@@ -132,6 +133,7 @@ pub fn remove_extended_path_prefix(path: &str) -> &str {
     }
 }
 
+#[allow(dead_code)]
 pub fn is_executable_file(path: &Path) -> bool {
     if let Ok(metadata) = metadata(path) {
         // 首先检查是否为文件

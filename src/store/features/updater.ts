@@ -1,5 +1,4 @@
 import { UPDATER_STEP } from "@/lib/constant";
-import { Response } from "@/pages/Layouts/SocketState/ws";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { invoke } from "@tauri-apps/api/core";
 import { check, Update } from "@tauri-apps/plugin-updater";
@@ -9,7 +8,7 @@ let update: Update
 
 export const checkUpdater = createAsyncThunk<Response<any>, boolean>('updater/checkUpdate', async (isBeta = false) => {
     await check();
-    return await invoke(`plugin:commands|set_${isBeta ? "beta" : "stable"}_updater`);
+    return await invoke(`set_${isBeta ? "beta" : "stable"}_updater`);
     // return await check();
 })
 
@@ -92,7 +91,7 @@ const UpdaterData = {
 }
 
 export const fetchHistoryReleases = createAsyncThunk<typeof UpdaterData, string>('updater/fetchHistoryReleases', (version) => {
-    return invoke("plugin:commands|fetch_history_releases", { version })
+    return invoke("fetch_history_releases", { version })
 })
 
 
@@ -149,8 +148,6 @@ const slice = createSlice({
             state.isLoading = false;
             const { code, data } = up
 
-            console.log('up', up);
-
             if (code === 0 && data?.is_latest) {
                 // toast.info("当前已经是最新版本", {
                 //     position: "top-center",
@@ -172,8 +169,6 @@ const slice = createSlice({
             update = new Update({
                 ...data
             });
-
-            console.log('update', update);
 
             // update = up
         })

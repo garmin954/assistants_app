@@ -9,15 +9,21 @@ import { Progress } from "@/components/ui/progress";
 import { UPDATER_STEP } from "@/lib/constant";
 import { formatBytes, formatSpeed } from "@/lib/utils";
 import { RootDispatch, RootState } from "@/store";
-import { installApp, UpdaterState } from "@/store/features/updater";
+import { installApp } from "@/store/features/updater";
 import { useThrottleEffect } from "ahooks";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useDispatch, useSelector } from "react-redux";
+import { shallowEqual, useDispatch, useSelector } from "react-redux";
 
-export default function DownloadProgress() {
-  const {t} = useTranslation();
-  const state = useSelector<RootState, UpdaterState>((state) => state.updater);
+const DownloadProgress = React.memo(() => {
+  const { t } = useTranslation();
+  const state = useSelector(
+    (state: RootState) => ({
+      step: state.updater.step,
+      download: state.updater.download,
+    }),
+    shallowEqual // 浅比较，避免无关字段变化触发渲染
+  );
   const dispatch = useDispatch<RootDispatch>();
 
   // 安装包大小
@@ -55,31 +61,55 @@ export default function DownloadProgress() {
         </DialogHeader>
 
         {state.step === UPDATER_STEP.DOWNLOAD ? (
-          <div className="flex flex-col gap-4 py-[3rem] h-[10rem] box-border">
-            <Progress className="h-[1.5rem]" value={state.download.progress} />
-            <div className="flex justify-between uf-font-regular">
-              <span>{t('network_speed')}：{speed}</span>
-              <span>
-                {download}/{total}
-              </span>
-            </div>
-          </div>
+          <ProgressSection
+            progress={state.download.progress}
+            speed={speed}
+            download={download}
+            total={total}
+          />
         ) : (
-          <div className="flex justify-between flex-col gap-4 items-center h-[10rem]">
-            <div className="text-center text-2xl mt-8">
-              
-              {t("install_tips")}
-            </div>
-            <Button
-              onClick={() => {
-                dispatch(installApp());
-              }}
-            >
-              {t('install_now')}
-            </Button>
-          </div>
+          <InstallSection onInstall={() => dispatch(installApp())} />
         )}
       </DialogContent>
     </Dialog>
   );
-}
+});
+
+type ProgressSectionProps = {
+  progress: number;
+  speed: string;
+  download: string;
+  total: string;
+};
+const ProgressSection = React.memo<ProgressSectionProps>(
+  ({ progress, speed, download, total }) => {
+    const { t } = useTranslation();
+    return (
+      <div className="flex flex-col gap-4 py-[3rem] h-[10rem] box-border">
+        <Progress className="h-[1.5rem]" value={progress} />
+        <div className="flex justify-between uf-font-regular">
+          <span>
+            {t("network_speed")}:{speed}
+          </span>
+          <span>
+            {download}/{total}
+          </span>
+        </div>
+      </div>
+    );
+  }
+);
+
+type InstallSectionProps = {
+  onInstall: () => void;
+};
+const InstallSection = React.memo<InstallSectionProps>(({ onInstall }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex justify-between flex-col gap-4 items-center h-[10rem]">
+      <div className="text-center text-2xl mt-8">{t("install_tips")}</div>
+      <Button onClick={onInstall}>{t("install_now")}</Button>
+    </div>
+  );
+});
+export default DownloadProgress;

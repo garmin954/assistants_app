@@ -24,5 +24,12 @@ impl<T> Response<T> {
         }
     }
 
-
+    #[allow(dead_code)]
+    pub new(code: i32, data: Option<T>, msg: impl Into<String>) -> Self {
+        Self {
+            code,
+            data,
+            msg: msg.into(),
+        }
+    }
 }

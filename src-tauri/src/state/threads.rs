@@ -1,37 +1,50 @@
-use std::{thread, time::Duration};
-use tauri::{path::BaseDirectory, AppHandle, Emitter, Manager};
+use std::sync::Arc;
+
+use anyhow::{anyhow, Ok};
+use tauri::{AppHandle, Manager};
 
 use crate::{
-    commands::system::SERVER_NAME, state::app_state::AppState,
-    utils::process_manage::is_process_running,
+    commands::arm_service::ws_get::ws_get_data,
+    state::app_state::{get_app_handle, AppState, SharedState},
 };
-
-// #[derive(Serialize, Clone, Debug)]
-// struct StateData {
-//     server_status: bool,
-// }
 
 pub fn get_state_data(rx: &AppHandle) {
     let app_handle = rx.clone();
 
-    let config_path = rx
-        .path()
-        .resolve("releases/uf_product_config.ini", BaseDirectory::Resource)
-        .unwrap();
+    // thread::spawn(move || loop {
+    //     let state = app_handle.state::<AppState>();
 
-    thread::spawn(move || loop {
-        let exist_config = config_path.exists();
-        let state = app_handle.state::<AppState>();
-        let mut state_data = state.state_data.lock().unwrap();
-        // update_state_data(&mut app_state);
-        state_data.server_status = is_process_running(SERVER_NAME);
-        app_handle
-            .emit(
-                "process-status-update",
-                (state_data.server_status, exist_config),
-            )
-            .unwrap();
+    //     let mut push_time = state.push_time;
+    //     let now_time = Local::now().timestamp_millis();
+    //     println!(
+    //         "now_time: {:?}- {:?} = {}",
+    //         now_time,
+    //         push_time,
+    //         now_time - push_time
+    //     );
+    //     if now_time - push_time > 1000 * 5 {
+    //         let _ = state.push_shared_state();
+    //         push_time = now_time;
+    //     }
+    //     thread::sleep(Duration::from_secs(100));
+    // });
+}
 
-        thread::sleep(Duration::from_secs(3));
-    });
+/// 更新数据 并广播  
+pub async fn update_shared_state() -> anyhow::Result<SharedState> {
+    let app_handle = get_app_handle()?;
+    let state = app_handle.state::<AppState>();
+
+    let wd = ws_get_data()
+        .await
+        .map_err(|op| anyhow!("ws_get_data error: {:?}", op))?;
+
+    let shared_state = {
+        let mut guard = state.shared_state.write().unwrap();
+        guard.axis = wd.axis;
+        guard.ft_sensor = wd.ft_sensor;
+        guard.clone()
+    };
+
+    Ok(shared_state)
 }

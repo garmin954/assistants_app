@@ -3,8 +3,6 @@ import { combineReducers } from 'redux'
 
 import AppReducer, { AppState } from './features/app'
 import UpdaterReducer, { UpdaterState } from './features/updater'
-import LogReducer, { LogState } from './features/log'
-import ArmReducer, { ArmState } from './features/arm'
 import AssistantsReducer, { AssistantsState } from './features/assistants'
 import WsReducer, { WsState } from './features/ws'
 
@@ -12,8 +10,6 @@ import WsReducer, { WsState } from './features/ws'
 const reducer = combineReducers({
     app: AppReducer,
     updater: UpdaterReducer,
-    log: LogReducer,
-    arm: ArmReducer,
     assistants: AssistantsReducer,
     ws: WsReducer
 })
@@ -30,8 +26,6 @@ const store = configureStore({
 
 export type RootState = {
     app: AppState,
-    arm: ArmState,
-    log: LogState,
     updater: UpdaterState,
     assistants: AssistantsState,
     ws: WsState

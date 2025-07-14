@@ -11,7 +11,7 @@ export const Debugging = {
     xarm_port_name: '',
     xarm_sn: '',
     xarm_state: 0,                          // 状态
-    xarm_target_joint_position: [0],
+    target_joint_position: [0],
     xarm_tcp_pose: [0, 0, 0, 0, 0, 0],            // 关节tcp位置
     xarm_type: '',
     xarm_version_number: '',

@@ -1,4 +1,4 @@
-import { ARM_JOINT_TYPE_UNIT, ChartJointValueMap, isJointParam, JointValueKey, MODE_JOINT_TYPE } from "@/pages/Home/options";
+import { ARM_JOINT_TYPE_UNIT, ChartJointValueMap, isJointParam, JointValueKey, MODE_JOINT_TYPE } from "@/pages/Observer/options";
 import { OPTION_EMPTY } from "../constant";
 
 
@@ -13,7 +13,7 @@ let joints: ChartJointValueMap[] = []
 
 // 当前选择的关节
 let curJoint = OPTION_EMPTY
-let curJointType = 'xarm_target_joint_positions'
+let curJointType = 'target_joint_positions'
 let dates: string[] = []
 // 当前模型关节数量
 let jointModel = 6
@@ -27,7 +27,7 @@ let count = 0
 self.onmessage = (event: MessageEvent<WorkerPush<unknown>>) => {
     const { type, value } = event.data as any
     if (type != "message") {
-        console.log('type===>', `[${type}]`, `(${value})`,);
+        // console.log('type===>', `[${type}]`, `(${value})`,);
     }
     switch (type) {
         case "message":
@@ -78,7 +78,7 @@ const onHandelMessage = (data: ChartJointValueMap[]) => {
     }
     keys = filteredKeys;
 
-    let unit_key: JointValueKey = "xarm_target_joint_positions";
+    let unit_key: JointValueKey = "target_joint_positions";
     keys.forEach((key) => {
         if (MODE_JOINT_TYPE.includes(key) || key === 'response_subtract_data') {
             if (key !== 'response_subtract_data') {

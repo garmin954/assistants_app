@@ -3,31 +3,43 @@ import { save } from "@tauri-apps/plugin-dialog";
 import { downloadDir, join, basename, dirname } from '@tauri-apps/api/path';
 import dayjs from "dayjs";
 
-import { Response, ws } from "@/pages/Layouts/SocketState/ws";
+
 import { RootState } from "..";
 import i18n from "@/lib/i18n";
 import { toast } from "sonner";
 import { sleep } from "@/lib/utils";
 import { ChartWorker } from "@/lib/worker";
 import { OPTION_EMPTY } from "@/lib/constant";
+import { invoke } from "@tauri-apps/api/core";
 
+type Response<T> = {
+    code: number,
+    msg: string,
+    id: string,
+    data: T,
+    type: string,
+}
 const worker = ChartWorker.getInstance()
 export const SELECTED_FIELD = {
-    joint: OPTION_EMPTY,
-    jointType: 'xarm_target_joint_positions',
-    hz: '250',
+    joint_dir: OPTION_EMPTY,                    // 观测的关节
+    observe_type: 'target_joint_positions',     // 观测的字段
+    hz: 'hz250',                                // 采样频率        
+    csv: false,                                 // 是否保存为csv文件
+    observer: false,                            // 是否开启观测
     type: "0",
-    unit: '0',
-    time: 100,
-    mode: 'observe',
-    compare: "1",
+    unit: 'degree',                             // 单位
+    time: 100,                                  // 超时时间
+    mode: 'observer',                           // 模式
+    compare: "1",                               // 比较模式
 }
 
 // 连接服务
 export const connectPortServer = createAsyncThunk<Response<unknown>, string>('assistants/connectPortServer', async (ip, { dispatch }) => {
     return new Promise(async (resolve, reject) => {
         try {
-            ws.send('connect_port', { ip }).then((res) => {
+            invoke('connect_robot_server', {
+                ipAddr: ip,
+            }).then((res: any) => {
                 if (res.code === 0) {
                     dispatch(getSixDof())
                 }
@@ -43,7 +55,7 @@ export const connectPortServer = createAsyncThunk<Response<unknown>, string>('as
 
 // 断开服务
 export const disconnectPortServer = createAsyncThunk<Response<unknown>>('assistants/disconnectPortServer', async () => {
-    return await ws.send('disconnect_port')
+    return await invoke('disconnect_robot_server')
 })
 
 
@@ -54,37 +66,40 @@ export const switchObserveState = createAsyncThunk<Response<unknown>>('assistant
     return new Promise(async (resolve) => {
         try {
             if (reporting) {
-                worker.postMessage({ type: "update", value: false });
-                ws.send('stop_status_report', {
-                    save_path: "",
-                    file_name: ""
-                }).then((res) => {
+                invoke("stop_assistant").then((res: any) => {
                     resolve({ ...res, data: { target: 'stop' } })
                 })
+                // ws.send('stop_status_report', {
+                //     save_path: "",
+                //     file_name: ""
+                // }).then((res) => {
+                //     resolve({ ...res, data: { target: 'stop' } })
+                // })
                 return
             }
 
-            const cmd = filter_field.mode === 'observe' ? 'start_status_report' : 'start_status_report_compare'
+            // @ts-ignore
+            const cmd = filter_field.mode === 'observer' ? 'start_status_report' : 'start_status_report_compare'
             const params = {
-                report_rate: filter_field.hz,
-                response_type: filter_field.type,
-                response_time: filter_field.time.toString(),
-            }
-            if (filter_field.mode === 'observe') {
-                Object.assign(params, { data_type: filter_field.jointType, })
-            } else {
-                const [data_type1, data_type2] = filter_field.jointType.split('@')
-                Object.assign(params, { data_type1, data_type2 })
+                mode: filter_field.mode,
+                observe_type: filter_field.observe_type,
+                joint_dir: filter_field.joint_dir,
+                hz: filter_field.hz,
+                unit: filter_field.unit,
+                timeout: filter_field.time,
+                csv: false,
             }
             worker.postMessage({
                 type: "set_joint_object",
-                value: filter_field.jointType,
+                value: filter_field.observe_type,
             });
             worker.postMessage({ type: "update", value: true });
+            console.log('params==>', params);
 
-            return ws.send(cmd, params).then((res) => {
+            return invoke("start_assistant", { params }).then((res: any) => {
                 resolve({ ...res, data: { target: 'start' } })
             })
+
         } catch (error) {
             toast.error("error:" + error)
         }
@@ -109,14 +124,16 @@ export const downloadObserverFile = createAsyncThunk<Response<unknown>>('assista
                 }]
             }).then(async (path) => {
                 if (path) {
+                    // @ts-ignore
                     const save_path = await dirname(path!)
+                    // @ts-ignore
                     const file_name = await basename(path!)
-                    ws.send('stop_status_report', {
-                        save_path,
-                        file_name
-                    }).then((res) => {
-                        resolve({ ...res, data: { target: 'stop' } })
-                    })
+                    // ws.send('stop_status_report', {
+                    //     save_path,
+                    //     file_name
+                    // }).then((res) => {
+                    //     resolve({ ...res, data: { target: 'stop' } })
+                    // })
                     return
                 }
                 resolve({ code: 1, msg: 'cancel', id: "", data: { target: 'stop' }, type: "" })
@@ -130,7 +147,7 @@ export const downloadObserverFile = createAsyncThunk<Response<unknown>>('assista
 
 // 获取是否六维力矩
 export const getSixDof = createAsyncThunk<Response<unknown>>('assistants/getSixDof', async () => {
-    return ws.send('xarm_get_ft_sensor_config')
+    return invoke('xarm_get_ft_sensor_config')
 })
 
 // export const onAutoStopObserve = createAsyncThunk<Response<unknown>>('assistants/onAutoStopObserve', async (_, { dispatch }) => {
@@ -163,34 +180,34 @@ const slice = createSlice({
             state.useRad = action.payload.value
         },
         setJointType: (state, action) => {
-            state.filter_field.jointType = action.payload.value
+            state.filter_field.observe_type = action.payload.value
         },
         setSelectedField: (state, action) => {
-            const { joint, jointType, hz, type, unit, time, mode, compare } = action.payload
+            const { joint_dir, observe_type, hz, type, unit, time, mode, compare } = action.payload
             // 设置角度/弧度
             if (unit !== state.filter_field.unit) {
                 worker.postMessage({ type: "set_rad_unit", value: unit });
                 worker.postMessage({ type: "clear_joints", value: null });
             }
 
-            if (joint !== state.filter_field.joint) {
-                worker.postMessage({ type: "set_current_joint", value: joint });
+            if (joint_dir !== state.filter_field.joint_dir) {
+                worker.postMessage({ type: "set_current_joint", value: joint_dir });
             }
 
-            if (jointType !== state.filter_field.jointType) {
-                worker.postMessage({ type: "set_joint_type", value: jointType });
+            if (observe_type !== state.filter_field.observe_type) {
+                worker.postMessage({ type: "set_joint_type", value: observe_type });
                 worker.postMessage({ type: "clear_joints", value: null });
             }
 
-            if (joint !== state.filter_field.joint || state.filter_field.compare !== compare || state.filter_field.unit !== unit) {
+            if (joint_dir !== state.filter_field.joint_dir || state.filter_field.compare !== compare || state.filter_field.unit !== unit) {
                 worker.postMessage({
                     type: "post_chart_data",
-                    value: joint,
+                    value: joint_dir,
                 })
             }
 
-            state.filter_field.joint = joint
-            state.filter_field.jointType = jointType
+            state.filter_field.joint_dir = joint_dir
+            state.filter_field.observe_type = observe_type
             state.filter_field.hz = hz
             state.filter_field.type = type
             state.filter_field.unit = unit
@@ -199,12 +216,12 @@ const slice = createSlice({
 
             if (mode !== state.filter_field.mode) {
                 state.filter_field.mode = mode
-                state.filter_field.jointType = (mode === "observe" ? 'xarm_target_joint_positions' : 'xarm_target_joint_positions@xarm_actual_joint_positions')
-                worker.postMessage({ type: "set_joint_type", value: state.filter_field.jointType });
+                state.filter_field.observe_type = (mode === "observer" ? 'target_joint_positions' : 'analysis_joint_positions')
+                worker.postMessage({ type: "set_joint_type", value: state.filter_field.observe_type });
                 worker.postMessage({ type: "clear_joints", value: null });
             }
 
-            state.curJoint = joint
+            state.curJoint = joint_dir
             state.useRad = unit === "1"
         }
     },

@@ -14,7 +14,7 @@
     "download": "下载",
     "sampleTime": "采样时长",
     "saveObservationData": "保存观测数据",
-    "observe": "观测",
+    "observer": "观测",
     "analysis": "分析",
     "compare": "对比",
     "differential": "差值",
@@ -29,59 +29,59 @@
     "operation_failed": "操作失败",
     "jointVelocityItems": [
         {
-            "value": "xarm_target_joint_positions",
+            "value": "target_joint_positions",
             "label": "规划关节位置"
         },
         {
-            "value": "xarm_target_joint_velocities",
+            "value": "target_joint_velocities",
             "label": "规划关节速度"
         },
         {
-            "value": "xarm_target_joint_accelerations",
+            "value": "target_joint_accelerations",
             "label": "规划关节加速度"
         },
         {
-            "value": "xarm_actual_joint_positions",
+            "value": "actual_joint_positions",
             "label": "实际关节位置"
         },
         {
-            "value": "xarm_actual_joint_velocities",
+            "value": "actual_joint_velocities",
             "label": "实际关节速度"
         },
         {
-            "value": "xarm_actual_joint_accelerations",
+            "value": "actual_joint_accelerations",
             "label": "实际关节加速度"
         },
         {
-            "value": "xarm_actual_joint_currents",
+            "value": "actual_joint_currents",
             "label": "实际关节电流"
         },
         {
-            "value": "xarm_estimated_joint_torques",
+            "value": "estimated_joint_torques",
             "label": "电流估算的关节力矩"
         },
         {
-            "value": "xarm_target_tcp_pose",
+            "value": "target_tcp_pose",
             "label": "规划TCP位置"
         },
         {
-            "value": "xarm_target_tcp_speed",
+            "value": "target_tcp_speed",
             "label": "规划TCP速度"
         },
         {
-            "value": "xarm_actual_tcp_pose",
+            "value": "actual_tcp_pose",
             "label": "实际TCP位置"
         },
         {
-            "value": "xarm_actual_tcp_speed",
+            "value": "actual_tcp_speed",
             "label": "实际TCP速度"
         },
         {
-            "value": "xarm_estimated_tcp_torques",
+            "value": "estimated_tcp_torques",
             "label": "电流估算的TCP力矩"
         },
         {
-            "value": "xraw_data_torque_sensor",
+            "value": "data_torque_sensor",
             "label": "力矩传感器(原始值)"
         },
         {
@@ -91,23 +91,23 @@
     ],
     "analysisItems": [
         {
-            "value": "xarm_target_joint_positions@xarm_actual_joint_positions",
+            "value": "analysis_joint_positions",
             "label": "关节位置"
         },
         {
-            "value": "xarm_target_joint_velocities@xarm_actual_joint_velocities",
+            "value": "analysis_joint_velocities",
             "label": "关节速度"
         },
         {
-            "value": "xarm_target_joint_accelerations@xarm_actual_joint_accelerations",
+            "value": "analysis_joint_accelerations",
             "label": "关节加速度"
         },
         {
-            "value": "xarm_actual_tcp_pose@xarm_target_tcp_pose",
+            "value": "analysis_tcp_positions",
             "label": "TCP位置"
         },
         {
-            "value": "xarm_actual_tcp_speed@xarm_target_tcp_speed",
+            "value": "analysis_tcp_velocities",
             "label": "TCP速度"
         }
     ]

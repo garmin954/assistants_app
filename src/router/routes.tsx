@@ -1,4 +1,4 @@
-import { RouteObject } from "react-router-dom";
+import { Navigate, RouteObject } from "react-router-dom";
 import React, { lazy } from "react";
 
 export const routes: RouteObject[] = [
@@ -13,8 +13,12 @@ export const routes: RouteObject[] = [
     ),
     children: [
       {
-        path: "home",
-        element: React.createElement(lazy(() => import("@/pages/Home"))),
+        index: true,
+        element: <Navigate to="observer" replace />,
+      },
+      {
+        path: "observer",
+        element: React.createElement(lazy(() => import("@/pages/Observer"))),
       },
     ],
   },

@@ -1,38 +1,41 @@
-import { RootDispatch, RootState } from "@/store";
-import { checkUpdater, downloadApp, openUpdateDialog, UpdaterState } from "@/store/features/updater";
+import { RootDispatch } from "@/store";
+import { checkUpdater, downloadApp, openUpdateDialog } from "@/store/features/updater";
 import { UPDATER_STEP } from "@/lib/constant";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { useCallback } from "react";
 
 export default function useUpdater() {
-    const state = useSelector<RootState, UpdaterState>(state => state.updater);
     const dispatch = useDispatch<RootDispatch>();
 
     const isBeta = false
-    async function onCheckUpdater() {
-        switch (state.step) {
-            case UPDATER_STEP.NORMAL:
-            case UPDATER_STEP.CHECK:
-                dispatch(checkUpdater(isBeta)).then(({ payload }: any) => {
-                    // 有新版本 弹出更新信息
-                    if (payload.code === 0 && !payload.data?.is_latest) {
-                        dispatch(openUpdateDialog(true));
-                    }
-                });
-                break;
-            case UPDATER_STEP.DOWNLOAD:
-                dispatch(openUpdateDialog(true));
-                break;
-            default:
-                break;
-        }
-    }
+    const onCheckUpdater = useCallback(() => {
+        dispatch((_, getState) => {
+            const currentStep = getState().updater.step; // 动态获取最新 step
+            switch (currentStep) {
+                case UPDATER_STEP.NORMAL:
+                case UPDATER_STEP.CHECK:
+                    return dispatch(checkUpdater(isBeta)).then(({ payload }: any) => {
+                        if (payload.code === 0 && !payload.data?.is_latest) {
+                            dispatch(openUpdateDialog(true));
+                        }
+                    });
+                case UPDATER_STEP.DOWNLOAD:
+                    return dispatch(openUpdateDialog(true));
+                default:
+                    return;
+            }
+        });
+    }, [dispatch]);
 
-    function onCloseUpdaterDialog() {
+    const onCloseUpdaterDialog = useCallback(() => {
         dispatch(openUpdateDialog(false));
-    }
-    async function onDownloadApp() {
+    }, [dispatch]);
+
+    const onDownloadApp = useCallback(() => {
         // 下载安装
         dispatch(downloadApp())
-    }
-    return { onCheckUpdater, onCloseUpdaterDialog, state, onDownloadApp };
+    }, [dispatch])
+
+
+    return { onCheckUpdater, onCloseUpdaterDialog, onDownloadApp };
 }

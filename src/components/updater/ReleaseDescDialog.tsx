@@ -22,7 +22,7 @@ type Props = {
 };
 
 export default function ReleaseDescDialog(props: Props) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   function close() {
@@ -31,8 +31,6 @@ export default function ReleaseDescDialog(props: Props) {
   }
 
   useEffect(() => {
-    console.log("props.show", props.show);
-
     setOpen(props.show);
   }, [props.show]);
 

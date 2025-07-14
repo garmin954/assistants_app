@@ -1,5 +1,5 @@
 export const UNKNOWN = 'N/A';
-export const OPTION_EMPTY = "00";
+export const OPTION_EMPTY = "all";
 export enum UPDATER_STEP {
     // 检查更新
     CHECK = 'check',

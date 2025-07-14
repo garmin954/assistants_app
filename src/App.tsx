@@ -1,17 +1,16 @@
 import { Provider } from "react-redux";
 import store from "./store";
-import { Toaster } from "@/components/ui/sonner";
 import { BrowserRouter } from "react-router-dom";
 import RouterConfig from "./router";
-import { ThemeProvider } from "./pages/components/theme/ThemeProvider";
-import { useKeyPress } from "ahooks";
 import LogicUpdater from "./components/updater/LogicUpdater";
+import { ThemeProvider } from "./pages/components/theme/ThemeProvider";
 
 // 打印rust日志
 // import { attachConsole } from "@tauri-apps/plugin-log";
 // attachConsole();
 function App() {
-  useKeyPress("ctrl.alt.f12", () => {});
+  console.log("App---------------->");
+
   return (
     <ThemeProvider>
       <Provider store={store}>
@@ -22,7 +21,6 @@ function App() {
           }}
         >
           <RouterConfig />
-          <Toaster />
         </BrowserRouter>
         <LogicUpdater />
       </Provider>

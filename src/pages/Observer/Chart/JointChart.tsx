@@ -41,7 +41,7 @@ echarts.use([
 
 interface Props {
   index: number;
-  getChartData: () => void;
+  // getChartData: () => void;
 }
 
 type RefType = {
@@ -163,7 +163,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
     if (set) {
       chart.current?.setOption(CHARTS_OPTIONS);
       // setCurVal("0");
-      props.getChartData();
+      // props.getChartData();
     }
     chart.current?.resize();
   }
@@ -185,7 +185,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
   function updateChartData(data: ChartJointValueMap, label: number[]) {
     const options = deepClone(CHARTS_OPTIONS);
     // options.series[0].symbol = "none";
-    if (state.filter_field.jointType === "xarm_joint_temperatures") {
+    if (state.filter_field.observe_type === "xarm_joint_temperatures") {
       // options.series[0].symbol = "emptyCircle";
       // options.xAxis.axisLabel.formatter = (value) => {
       //   return value.slice(11, value.length);
@@ -202,7 +202,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
           key !== "response_subtract_data") ||
         (state.filter_field.compare === "0" &&
           key === "response_subtract_data") ||
-        state.filter_field.mode === "observe"
+        state.filter_field.mode === "observer"
       ) {
         const d = data[key]!;
         (options.series as any[]).push(setChartSeries(d, chartNameData[key]));
@@ -223,28 +223,16 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
   // 标题
   const title = useMemo(() => {
     const option = optionsCorrespondingToParameters(
-      state.filter_field.jointType as keyof typeof ARM_JOINT_TYPE_UNIT
+      state.filter_field.observe_type as keyof typeof ARM_JOINT_TYPE_UNIT
     );
     const item = option.find((v) => +v.value === +props.index);
     return item?.label || null;
-  }, [props.index, state.filter_field.jointType]);
-
-  // 单位
-  // const unitTxt = useMemo(() => {
-  //   let u =
-  //     ARM_JOINT_TYPE_UNIT[
-  //       state.filter_field.jointType as keyof typeof ARM_JOINT_TYPE_UNIT
-  //     ][props.index];
-  //   if (+state.filter_field.unit === 0 && u.includes("rad")) {
-  //     u = u.replace("rad", "°");
-  //   }
-  //   return u;
-  // }, [props.index, state.filter_field.jointType, state.filter_field.unit]);
+  }, [props.index, state.filter_field.observe_type]);
 
   useEffect(() => {
     selectedPoints.current = [[], []];
   }, [
-    state.filter_field.jointType,
+    state.filter_field.observe_type,
     state.filter_field.compare,
     state.filter_field.mode,
     state.filter_field.unit,
@@ -252,7 +240,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
   ]);
 
   const { run: throttledUpdate } = useThrottleFn(updateChartData, {
-    wait: 300,
+    wait: 30,
     leading: true,
   });
   useImperativeHandle(ref, () => ({ update: throttledUpdate }));

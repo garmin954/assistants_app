@@ -4,7 +4,7 @@ use serde::Serialize;
 pub struct Response<T> {
     pub code: i32,
     pub data: Option<T>,
-    pub msg: String,
+    pub message: String,
 }
 
 impl<T> Response<T> {
@@ -12,7 +12,7 @@ impl<T> Response<T> {
         Self {
             code: 0,
             data: Some(data),
-            msg: "success".to_string(),
+            message: "success".to_string(),
         }
     }
 
@@ -20,7 +20,7 @@ impl<T> Response<T> {
         Self {
             code: -1,
             data: None,
-            msg: msg.into(),
+            message: msg.into(),
         }
     }
 
@@ -29,12 +29,12 @@ impl<T> Response<T> {
         Self {
             code,
             data,
-            msg: msg.into(),
+            message: msg.into(),
         }
     }
 }
 
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 
 impl<T, E: Display> From<Result<T, E>> for Response<T> {
     fn from(result: Result<T, E>) -> Self {
@@ -43,4 +43,27 @@ impl<T, E: Display> From<Result<T, E>> for Response<T> {
             Err(e) => Response::error(e.to_string()),
         }
     }
+}
+
+pub fn to_response<T, E: std::fmt::Display>(result: Result<T, E>, msg: &str) -> Response<T> {
+    match result {
+        Ok(v) => Response::success(v),
+        Err(e) => Response::error(format!("{msg}: {e}")),
+    }
+}
+
+// 改为同步函数，接收已完成的 Result
+pub fn wrap_result<T, E: Debug>(result: Result<T, E>) -> Result<Response<T>, E> {
+    match result {
+        Ok(data) => Ok(Response::success(data)),
+        Err(err) => Err(err),
+    }
+}
+
+// 宏保持不变，但使用时需要确保传入的是已完成的 Result
+#[macro_export]
+macro_rules! result_response {
+    ($expr:expr) => {
+        crate::utils::response::wrap_result($expr)
+    };
 }

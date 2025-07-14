@@ -50,7 +50,7 @@ export default function Nav() {
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
     worker.postMessage({
-       type: "post_chart_data",
+      type: "post_chart_data",
     });
     getCurrentWindow().setTitle(t("appTitle"));
   };
@@ -59,7 +59,7 @@ export default function Nav() {
     return Languages.find((item) => item.code === i18n.language);
   }, [i18n.language]);
 
-  const [ipAddress, setIpAddress] = useState("192.168.1.");
+  const [ipAddress, setIpAddress] = useState("192.168.1.57");
   const [isValidIp, setIsValidIp] = useState(true);
 
   const validateIp = (ip: string) => {

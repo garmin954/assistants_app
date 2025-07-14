@@ -4,7 +4,7 @@ use crate::{commands::system::SERVER_NAME, utils::process_manage::kill_process};
 
 pub fn setup_desktop_window(app: &AppHandle) -> tauri::Result<()> {
     // 主窗口配置
-    let main_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::App("/app/home".into()))
+    let main_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::App("/app".into()))
         .title("")
         .resizable(true)
         .center()

@@ -1,24 +1,33 @@
-import { useEffect,  } from "react";
+import React, { useEffect } from "react";
 import "github-markdown-css/github-markdown.css";
 import ReleaseDescDialog from "./ReleaseDescDialog";
 import DownloadProgress from "./DownloadProgress";
 import useUpdater from "./useUpdater";
+import { shallowEqual, useSelector } from "react-redux";
+import { RootState } from "@/store";
 
 // @ts-ignore
 interface Props {
   className?: string;
   isBeta?: boolean;
 }
-export default function LogicUpdater() {
-  const {state,  onCloseUpdaterDialog, onDownloadApp, onCheckUpdater} = useUpdater();
+
+// memo
+
+const LogicUpdater = React.memo(() => {
+  const { upd, openRelease } = useSelector(
+    (state: RootState) => ({
+      upd: state.updater.updater,
+      openRelease: state.updater.openRelease,
+    }),
+    shallowEqual
+  );
+
+  const { onCloseUpdaterDialog, onDownloadApp, onCheckUpdater } = useUpdater();
 
   useEffect(() => {
     onCheckUpdater();
-    console.log('state.updater==>', state.updater);
-  }, [])
-
-
-  const upd = state.updater;
+  }, [onCheckUpdater]);
 
   return (
     <>
@@ -34,7 +43,7 @@ export default function LogicUpdater() {
       </Button> */}
 
       <ReleaseDescDialog
-        show={state.openRelease}
+        show={openRelease}
         onInstall={() => onDownloadApp()}
         onClose={() => onCloseUpdaterDialog()}
         content={upd.body.content}
@@ -44,4 +53,6 @@ export default function LogicUpdater() {
       <DownloadProgress />
     </>
   );
-}
+});
+
+export default LogicUpdater;
