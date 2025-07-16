@@ -14,7 +14,7 @@ use std::{
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
-pub static GLOBAL_APP_HANDLE: OnceCell<std::sync::Arc<AppHandle>> = OnceCell::new();
+pub static GLOBAL_APP_HANDLE: OnceCell<std::sync::Arc<AppHandle<tauri::Wry>>> = OnceCell::new();
 
 #[derive(Serialize, Clone, Debug)]
 pub struct StateData {
@@ -62,24 +62,19 @@ impl Default for SharedState {
 #[derive(Debug)]
 pub struct AppState {
     // pub user_settings: Mutex<UserSettings>,
+    pub ws_ip: Arc<RwLock<String>>,
     pub app: AppHandle,
-    pub state_data: Mutex<StateData>,
     pub udp_state: Mutex<UdpState>,
     pub client: Mutex<Client>,
     pub robot_server: Arc<RwLock<RobotServer>>,
     pub shared_state: Arc<RwLock<SharedState>>,
-    // 推送时间 时间戳
-    pub push_time: i64,
 }
 
 impl AppState {
     pub fn new(app: AppHandle) -> Self {
         Self {
+            ws_ip: Arc::new(RwLock::new("".to_string())),
             app: app,
-            // user_settings: Mutex::new(UserSettings::default()),
-            state_data: Mutex::new(StateData {
-                server_status: false,
-            }),
             udp_state: Mutex::new(UdpState {
                 socket: None,
                 handle: None,
@@ -96,8 +91,6 @@ impl AppState {
                 stop_flag: Arc::new(AtomicBool::new(false)),
             })),
             shared_state: Arc::new(RwLock::new(SharedState::default())),
-            // 推送时间 时间戳
-            push_time: Local::now().timestamp_millis(),
         }
     }
     // 推送共享状态到前端
@@ -121,7 +114,7 @@ impl AppState {
 }
 
 // 获取全局的app 实例
-pub fn get_app_handle() -> Result<Arc<AppHandle>> {
+pub fn get_app_handle() -> Result<Arc<AppHandle<tauri::Wry>>> {
     GLOBAL_APP_HANDLE
         .get()
         .cloned()

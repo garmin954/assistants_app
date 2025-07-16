@@ -228,8 +228,12 @@ const slice = createSlice({
     extraReducers(builder) {
         builder.addCase(connectPortServer.fulfilled, (state, action) => {
             const { code } = action.payload
+
+
             if (code === 0) {
                 state.server_state = true
+            } else {
+                toast.error(i18n.t("connect_failed"))
             }
         })
 

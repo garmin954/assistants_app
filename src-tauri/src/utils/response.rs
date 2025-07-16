@@ -45,18 +45,16 @@ impl<T, E: Display> From<Result<T, E>> for Response<T> {
     }
 }
 
-pub fn to_response<T, E: std::fmt::Display>(result: Result<T, E>, msg: &str) -> Response<T> {
-    match result {
-        Ok(v) => Response::success(v),
-        Err(e) => Response::error(format!("{msg}: {e}")),
-    }
-}
-
 // 改为同步函数，接收已完成的 Result
-pub fn wrap_result<T, E: Debug>(result: Result<T, E>) -> Result<Response<T>, E> {
+pub fn wrap_result<T, E: std::fmt::Debug>(
+    result: Result<T, E>,
+) -> Result<Response<T>, Response<E>> {
     match result {
         Ok(data) => Ok(Response::success(data)),
-        Err(err) => Err(err),
+        Err(err) => {
+            let msg = format!("{:?}", err);
+            Ok(Response::error(msg))
+        }
     }
 }
 

@@ -14,7 +14,7 @@
     "download": "Download",
     "sampleTime": "Sample Time",
     "saveObservationData": "Save Observe Data",
-    "observer": "Observe",
+    "observe": "Observe",
     "analysis": "Analysis",
     "compare": "Compare",
     "differential": "Difference",
@@ -27,61 +27,62 @@
     "install_tips": "The installation package is downloaded, click to install immediately",
     "install_now": "Install Now",
     "operation_failed": "Operation failed",
+    "connect_failed": "Connect failed",
     "jointVelocityItems": [
         {
-            "value": "target_joint_positions",
+            "value": "xarm_target_joint_positions",
             "label": "Target Joint Positions"
         },
         {
-            "value": "target_joint_velocities",
+            "value": "xarm_target_joint_velocities",
             "label": "Target Joint Velocities"
         },
         {
-            "value": "target_joint_accelerations",
+            "value": "xarm_target_joint_accelerations",
             "label": "Target Joint Accelerations"
         },
         {
-            "value": "actual_joint_positions",
+            "value": "xarm_actual_joint_positions",
             "label": "Actual Joint Positions"
         },
         {
-            "value": "actual_joint_velocities",
+            "value": "xarm_actual_joint_velocities",
             "label": "Actual Joint Velocities"
         },
         {
-            "value": "actual_joint_accelerations",
+            "value": "xarm_actual_joint_accelerations",
             "label": "Actual Joint Accelerations"
         },
         {
-            "value": "actual_joint_currents",
+            "value": "xarm_actual_joint_currents",
             "label": "Actual Joint Currents"
         },
         {
-            "value": "estimated_joint_torques",
+            "value": "xarm_estimated_joint_torques",
             "label": "Estimated Joint Torques"
         },
         {
-            "value": "target_tcp_pose",
+            "value": "xarm_target_tcp_pose",
             "label": "Target TCP Pose"
         },
         {
-            "value": "target_tcp_speed",
+            "value": "xarm_target_tcp_speed",
             "label": "Target TCP Speed"
         },
         {
-            "value": "actual_tcp_pose",
+            "value": "xarm_actual_tcp_pose",
             "label": "Actual TCP Pose"
         },
         {
-            "value": "actual_tcp_speed",
+            "value": "xarm_actual_tcp_speed",
             "label": "Actual TCP Speed"
         },
         {
-            "value": "estimated_tcp_torques",
+            "value": "xarm_estimated_tcp_torques",
             "label": "Estimated TCP Torques"
         },
         {
-            "value": "data_torque_sensor",
+            "value": "xraw_data_torque_sensor",
             "label": "Raw Data of 6-Axis Torque Sensor"
         },
         {
@@ -91,23 +92,23 @@
     ],
     "analysisItems": [
         {
-            "value": "analysis_joint_positions",
+            "value": "xarm_target_joint_positions@xarm_actual_joint_positions",
             "label": "Joint Positions"
         },
         {
-            "value": "analysis_joint_velocities",
+            "value": "xarm_target_joint_velocities@xarm_actual_joint_velocities",
             "label": "Joint Velocities"
         },
         {
-            "value": "analysis_joint_accelerations",
+            "value": "xarm_target_joint_accelerations@xarm_actual_joint_accelerations",
             "label": "Joint Accelerations"
         },
         {
-            "value": "analysis_tcp_positions",
+            "value": "xarm_actual_tcp_pose@xarm_target_tcp_pose",
             "label": "TCP Pose"
         },
         {
-            "value": "analysis_tcp_velocities",
+            "value": "xarm_actual_tcp_speed@xarm_target_tcp_speed",
             "label": "TCP Speed"
         }
     ]

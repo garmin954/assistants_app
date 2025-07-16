@@ -113,9 +113,8 @@ export default function Nav() {
       <div className="flex gap-4 items-center">
         <Input
           placeholder={t("address_ip")}
-          className={`bg-input w-[15rem] h-[3rem] text-xl ${
-            !isValidIp ? "border-red-500" : ""
-          }`}
+          className={`bg-input w-[15rem] h-[3rem] text-xl ${!isValidIp ? "border-red-500" : ""
+            }`}
           value={ipAddress}
           onChange={handleIpChange}
           readOnly={state.server_state}

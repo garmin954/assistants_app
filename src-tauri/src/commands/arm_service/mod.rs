@@ -16,7 +16,7 @@ use serde_json::Value;
 use tauri::{Emitter, Manager};
 
 use crate::{
-    commands::arm_service::ws_get::ws_get_data,
+    commands::arm_service::ws_get::{ws_connect_state, ws_get_data},
     result_response,
     state::{app_state::AppState, threads::update_shared_state},
     utils::response::Response,
@@ -27,7 +27,11 @@ pub async fn connect_robot_server<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     state: tauri::State<'_, AppState>,
     ip_addr: &str,
-) -> Result<Response<String>, String> {
+) -> Result<Response<String>, Response<String>> {
+    if !ws_connect_state(ip_addr).await {
+        return Ok(Response::error("ws连接失败"));
+    }
+
     let result = async || {
         {
             let mut robot_lock = match state.robot_server.write() {
@@ -36,9 +40,10 @@ pub async fn connect_robot_server<R: tauri::Runtime>(
             };
 
             if robot_lock.connected {
-                return Err("Server is already running".to_string());
+                return Ok("Server is already running".to_string());
             }
 
+            *state.ws_ip.write().unwrap() = ip_addr.to_string();
             /********* socket 读取并推送到前端 *********/
             // 配置参数
             let robot_ip = format!("{}:{}", ip_addr, 30000);
@@ -78,7 +83,11 @@ pub async fn connect_robot_server<R: tauri::Runtime>(
 
         update_shared_state()
             .await
-            .map_err(|e| format!("Failed to update shared state: {:?}", e));
+            .map_err(|e| format!("Failed to update shared state: {:?}", e))?;
+
+        state
+            .push_shared_state()
+            .map_err(|e| format!("Failed to push shared state: {:?}", e))?;
 
         Ok("Robot server connected successfully".to_string())
     };
@@ -89,7 +98,7 @@ pub async fn connect_robot_server<R: tauri::Runtime>(
 #[tauri::command(async)]
 pub async fn disconnect_robot_server(
     state: tauri::State<'_, AppState>,
-) -> Result<Response<String>, String> {
+) -> Result<Response<String>, Response<String>> {
     let result = async || {
         let mut robot_lock = state
             .robot_server
@@ -112,9 +121,8 @@ pub async fn disconnect_robot_server(
                 .map_err(|e| format!("Failed to disconnect: {}", e))?;
 
             if let Some(handler) = robot_lock.handle.take() {
-                handler
-                    .join()
-                    .map_err(|e| format!("Failed to join thread: {:?}", e))?;
+                // 这里忽略线程的返回值，仅关注线程是否成功 join
+                let _ = handler.join();
             }
 
             robot_lock.socket = None;
@@ -132,60 +140,61 @@ pub async fn disconnect_robot_server(
 pub fn start_assistant(
     state: tauri::State<AppState>,
     params: structs::ObserveParams,
-) -> anyhow::Result<String, String> {
+) -> Response<String> {
     let robot_lock = match state.robot_server.write() {
         Ok(lock) => lock,
-        Err(_) => return Err("Failed to acquire lock".to_string()),
+        Err(_) => return Response::error("Failed to acquire lock"),
     };
 
     if !robot_lock.connected {
-        return Err("Server is not running".to_string());
+        return Response::error("Server is not running");
     }
 
     if robot_lock.observer_running.load(Ordering::Relaxed) {
-        return Err("Assistant is already running".to_string());
+        return Response::error("Assistant is already running");
     }
+
     robot_lock.observer_running.store(true, Ordering::Relaxed);
 
     let mut params_write = match robot_lock.observe_params.write() {
         Ok(write) => write,
-        Err(_) => return Err("Failed to acquire lock".to_string()),
+        Err(_) => return Response::error("Failed to acquire lock"),
     };
 
     *params_write = params;
 
-    Ok("Assistant started successfully".to_string())
+    Response::success("Assistant started successfully".to_string())
 }
 
 #[tauri::command]
-pub fn stop_assistant(state: tauri::State<AppState>) -> Result<Response<String>, String> {
+pub fn stop_assistant(state: tauri::State<AppState>) -> Response<String> {
     let robot_lock = match state.robot_server.write() {
         Ok(lock) => lock,
-        Err(_) => return Err("Failed to acquire lock".to_string()),
+        Err(_) => return Response::error("Failed to acquire lock"),
     };
 
     if !robot_lock.connected {
-        return Err("Server is not running".to_string());
+        return Response::error("Server is not running");
     }
 
     if !robot_lock.observer_running.load(Ordering::Relaxed) {
-        return Err("Assistant is not running".to_string());
+        return Response::error("Assistant is not running");
     }
 
     robot_lock.observer_running.store(false, Ordering::Relaxed);
 
-    Ok(Response::success(
-        "Assistant stopped successfully".to_string(),
-    ))
+    Response::success("Assistant stopped successfully".to_string())
 }
 
 #[tauri::command(async)]
-pub async fn get_robot_axis() -> Response<Value> {
-    let sdk_data = ws_get_data().await;
+pub async fn get_robot_axis(
+    state: tauri::State<'_, AppState>,
+) -> Result<Response<Value>, Response<String>> {
+    let ws_ip = state.ws_ip.read().unwrap().clone();
+    let sdk_data = ws_get_data(ws_ip.as_str()).await;
     if let Ok(data) = sdk_data {
         let json = serde_json::to_value(data).unwrap();
-        return Response::success(json);
+        return Ok(Response::success(json));
     }
-
-    Response::error("Failed to get robot axis")
+    Ok(Response::error("Failed to get robot axis"))
 }
