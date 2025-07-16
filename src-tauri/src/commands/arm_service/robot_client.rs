@@ -2,7 +2,7 @@ use crate::commands::arm_service::connection::RobotConnection;
 use crate::commands::arm_service::parser::Parser;
 use crate::commands::arm_service::robot_data::RobotDataPacket;
 use crate::commands::arm_service::structs::{
-    ChartData, Mode, ObserveParams, ObserveType, ResponseChartData,
+    ChartData, Hertz, Mode, ObserveParams, ObserveType, ResponseChartData,
 };
 use chrono::{DateTime, Local};
 use std::io::{self, Result};
@@ -55,10 +55,8 @@ impl RobotClient {
         let mut buffer = vec![0u8; self.buffer_size];
         let mut incomplete_data = Vec::new();
         let mut packet_count = 0;
-
-        println!("开始采集机器人数据...");
-
         let mut last_exec_time = Instant::now();
+        println!("开始采集机器人数据...");
 
         while !stop_flag.load(Ordering::Relaxed) {
             // 读取数据
@@ -70,11 +68,6 @@ impl RobotClient {
                     }
                     // 添加到缓冲区
                     incomplete_data.extend_from_slice(&buffer[0..bytes_read]);
-                    // println!(
-                    //     "读取到 {} 字节数据，当前缓冲区大小: {}",
-                    //     bytes_read,
-                    //     incomplete_data.len()
-                    // );
 
                     // 处理完整数据包
                     let processed =
@@ -82,16 +75,23 @@ impl RobotClient {
                             .process_packets(&mut incomplete_data, |packet| {
                                 packet_count += 1;
                                 if observer_running.load(Ordering::Relaxed) {
-                                    // 检查是否需要执行handler
-                                    // let exec_interval = Duration::from_secs_f32(1.0 / 250 as f32);
-                                    // let elapsed = last_exec_time.elapsed();
-                                    // if elapsed >= exec_interval {
-                                    //     last_exec_time = Instant::now();
-                                    //     let rp = process_chart_data(observe_params.clone(), packet);
-                                    //     handler(rp)?;
-                                    // }
-                                    let rp = process_chart_data(observe_params.clone(), packet);
-                                    handler(rp)?;
+                                    let observe_params_clone = observe_params.clone();
+                                    let params = observe_params_clone.read().unwrap();
+
+                                    if params.hz == Hertz::Hz5 {
+                                        // 检查是否需要执行handler
+                                        let exec_interval = Duration::from_secs_f32(1.0 / 5 as f32);
+                                        let elapsed = last_exec_time.elapsed();
+                                        if elapsed >= exec_interval {
+                                            last_exec_time = Instant::now();
+                                            let rp =
+                                                process_chart_data(observe_params.clone(), packet);
+                                            handler(rp)?;
+                                        }
+                                    } else {
+                                        let rp = process_chart_data(observe_params.clone(), packet);
+                                        handler(rp)?;
+                                    }
                                 }
                                 Ok(())
                             })?;
@@ -114,11 +114,6 @@ impl RobotClient {
             }
         }
 
-        // let duration = start_time.elapsed().as_secs_f64();
-        // println!(
-        //     "采集完成，共处理 {} 个数据包，耗时 {:.2} 秒",
-        //     packet_count, duration
-        // );
         self.is_running.store(false, Ordering::Relaxed);
         Ok(())
     }
@@ -218,13 +213,28 @@ pub fn process_chart_data(
 
     let mut data: Vec<ChartData> = vec![];
     for ot in choose_ot {
-        let value = match ot {
-            ObserveType::ActualJointPositions => packet.actual_joint_positions.clone(),
-            ObserveType::TargetJointPositions => packet.target_joint_positions.clone(),
-            ObserveType::ActualJointVelocities => packet.actual_joint_velocities.clone(),
-            ObserveType::TargetJointVelocities => packet.target_joint_velocities.clone(),
-            ObserveType::ActualJointAccelerations => packet.actual_joint_accelerations.clone(),
-            ObserveType::TargetJointAccelerations => packet.target_joint_accelerations.clone(),
+        let value: Vec<f32> = match ot {
+            ObserveType::TargetJointPositions => packet.actual_joint_positions.clone().to_vec(),
+            ObserveType::TargetJointVelocities => packet.target_joint_velocities.clone().to_vec(),
+            ObserveType::TargetJointAccelerations => {
+                packet.target_joint_accelerations.clone().to_vec()
+            }
+            ObserveType::ActualJointPositions => packet.actual_joint_positions.clone().to_vec(),
+            ObserveType::ActualJointVelocities => packet.actual_joint_velocities.clone().to_vec(),
+            ObserveType::ActualJointAccelerations => {
+                packet.actual_joint_accelerations.clone().to_vec()
+            }
+            ObserveType::ActualJointCurrents => packet.actual_joint_currents.clone().to_vec(),
+            ObserveType::ActualJointTorques => packet.estimated_joint_torques.clone().to_vec(),
+            ObserveType::TargetTcpPos => packet.target_tcp_pose.clone().to_vec(),
+            ObserveType::TargetTcpVelocities => packet.target_tcp_velocity.clone().to_vec(),
+            ObserveType::ActualTcpPose => packet.actual_tcp_pose.clone().to_vec(),
+            ObserveType::ActualTcpVelocity => packet.actual_tcp_velocity.clone().to_vec(),
+            ObserveType::EstimatedTcpTorque => packet.estimated_tcp_torque.clone().to_vec(),
+            ObserveType::DataTorqueSensor => packet.data_torque_sensor.clone().to_vec(),
+            ObserveType::FilteredDataTorqueSensor => {
+                packet.filtered_data_torque_sensor.clone().to_vec()
+            }
             _ => {
                 return Err(io::Error::new(
                     io::ErrorKind::InvalidData,

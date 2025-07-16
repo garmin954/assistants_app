@@ -1,7 +1,6 @@
-use crate::commands::arm_service::{robot_client::RobotClient, structs};
-use anyhow::Result;
-use chrono::Local;
-use tauri::{AppHandle, Emitter}; // ← 这个是关键
+use crate::commands::arm_service::{robot_client::RobotClient, structs, ws_get::ws_get_data};
+use anyhow::{anyhow, Result};
+use tauri::{AppHandle, Emitter, Manager}; // ← 这个是关键
 
 use once_cell::sync::OnceCell;
 
@@ -47,6 +46,7 @@ pub struct SharedState {
     pub axis: i32,
     pub ft_sensor: bool,
     pub arm_conn: bool,
+    pub observering: bool,
 }
 
 impl Default for SharedState {
@@ -55,6 +55,7 @@ impl Default for SharedState {
             axis: 0,
             ft_sensor: false,
             arm_conn: false,
+            observering: false,
         }
     }
 }
@@ -93,7 +94,7 @@ impl AppState {
             shared_state: Arc::new(RwLock::new(SharedState::default())),
         }
     }
-    // 推送共享状态到前端
+    /// 推送共享状态到前端
     pub fn push_shared_state(&self) -> Result<SharedState> {
         let shared_state = match self.shared_state.try_read() {
             Ok(shared_state) => shared_state.clone(),
@@ -108,8 +109,18 @@ impl AppState {
             .emit("APP_SHARED_STATE", &shared_state)
             .map_err(|op| anyhow::anyhow!("Failed to emit APP_SHARED_STATE event: {:?}", op))?;
 
-        println!("shared_state==>{:?}", shared_state);
         Ok(shared_state)
+    }
+
+    /// 设置共享状态
+    pub fn set_shared_state(&self, state: SharedState) -> anyhow::Result<()> {
+        let mut shared_state = self
+            .shared_state
+            .write()
+            .map_err(|_| anyhow::anyhow!("Failed to acquire write lock on shared_state"))?;
+
+        *shared_state = state;
+        Ok(())
     }
 }
 

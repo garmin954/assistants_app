@@ -77,7 +77,7 @@ export function useOptions(state: AssistantsState) {
     DefaultOptionType[]
   >(() => {
     return [
-      { value: "observer", label: t("observer") },
+      { value: "observer", label: t("observe") },
       { value: "analysis", label: t("analysis") },
     ];
   }, [i18n.language]);

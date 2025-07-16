@@ -104,7 +104,7 @@ impl Default for ObserveParams {
 pub struct ChartData {
     #[serde(rename = "type")]
     pub data_type: ObserveType,
-    pub value: [f32; 7],
+    pub value: Vec<f32>,
 }
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ResponseChartData {

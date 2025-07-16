@@ -18,7 +18,7 @@ use tauri::{Emitter, Manager};
 use crate::{
     commands::arm_service::ws_get::{ws_connect_state, ws_get_data},
     result_response,
-    state::{app_state::AppState, threads::update_shared_state},
+    state::app_state::{AppState, SharedState},
     utils::response::Response,
 };
 
@@ -81,9 +81,20 @@ pub async fn connect_robot_server<R: tauri::Runtime>(
             robot_lock.handle = Some(handler);
         }
 
-        update_shared_state()
+        /*************************** 读取并更新shared_state *************************** */
+        let mut shared_state = state.shared_state.clone().read().unwrap().clone();
+        let wd = ws_get_data(ip_addr)
             .await
             .map_err(|e| format!("Failed to update shared state: {:?}", e))?;
+
+        shared_state.arm_conn = true;
+        shared_state.axis = wd.axis;
+        shared_state.ft_sensor = wd.ft_sensor;
+        shared_state.observering = false;
+
+        if let Err(e) = state.set_shared_state(shared_state) {
+            return Err(format!("Failed to update shared state: {:?}", e));
+        };
 
         state
             .push_shared_state()
@@ -127,6 +138,17 @@ pub async fn disconnect_robot_server(
 
             robot_lock.socket = None;
             robot_lock.connected = false;
+
+            /*************************** 读取并更新shared_state *************************** */
+            let shared_state = SharedState::default();
+            if let Err(e) = state.set_shared_state(shared_state) {
+                return Err(format!("Failed to update shared state: {:?}", e));
+            };
+
+            state
+                .push_shared_state()
+                .map_err(|e| format!("Failed to push shared state: {:?}", e))?;
+
             Ok("Robot server disconnected successfully".to_string())
         } else {
             Err("Failed to acquire client lock".to_string())
@@ -163,6 +185,13 @@ pub fn start_assistant(
 
     *params_write = params;
 
+    /*************************** 读取并更新shared_state *************************** */
+    let mut shared_state = state.shared_state.clone().read().unwrap().clone();
+    shared_state.observering = true;
+
+    state.set_shared_state(shared_state).unwrap();
+    state.push_shared_state().unwrap();
+
     Response::success("Assistant started successfully".to_string())
 }
 
@@ -182,6 +211,13 @@ pub fn stop_assistant(state: tauri::State<AppState>) -> Response<String> {
     }
 
     robot_lock.observer_running.store(false, Ordering::Relaxed);
+
+    /*************************** 读取并更新shared_state *************************** */
+    let mut shared_state = state.shared_state.clone().read().unwrap().clone();
+    shared_state.observering = false;
+
+    state.set_shared_state(shared_state).unwrap();
+    state.push_shared_state().unwrap();
 
     Response::success("Assistant stopped successfully".to_string())
 }
