@@ -114,16 +114,11 @@ export const downloadObserverFile = createAsyncThunk<Response<unknown>>('assista
                 }]
             }).then(async (path) => {
                 if (path) {
-                    // @ts-ignore
-                    const save_path = await dirname(path!)
-                    // @ts-ignore
-                    const file_name = await basename(path!)
-                    // ws.send('stop_status_report', {
-                    //     save_path,
-                    //     file_name
-                    // }).then((res) => {
-                    //     resolve({ ...res, data: { target: 'stop' } })
-                    // })
+                    invoke('save_csv', {
+                        path
+                    }).then((res: any) => {
+                        resolve(res)
+                    })
                     return
                 }
                 resolve({ code: 1, msg: 'cancel', id: "", data: { target: 'stop' }, type: "" })
@@ -247,11 +242,10 @@ const slice = createSlice({
             }
         })
 
-        builder.addCase(getSixDof.fulfilled, (state, action) => {
-            const { code, data } = action.payload as any
-            if (code === 0) {
-                state.sixDof = data !== 0
-                state.filter_field.hz = data !== 0 ? '200' : '250'
+        builder.addCase(getSixDof.fulfilled, (_state, action) => {
+            const { code } = action.payload as any
+            if (code !== 0) {
+                toast.error(i18n.t("download_fail"))
             }
         })
     }

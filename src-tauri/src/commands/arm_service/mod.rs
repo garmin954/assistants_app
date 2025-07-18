@@ -1,5 +1,5 @@
 mod connection;
-mod csv_exporter;
+pub mod csv_exporter;
 mod parser;
 pub mod robot_client;
 mod robot_data;
@@ -7,17 +7,22 @@ pub mod structs;
 pub mod ws_get;
 
 use std::{
+    path::PathBuf,
     sync::{atomic::Ordering, Arc, Mutex},
     thread,
     time::Duration,
 };
 
+use anyhow::Context;
 use robot_client::RobotClient;
 use serde_json::Value;
 use tauri::{Emitter, Manager};
 
 use crate::{
-    commands::arm_service::ws_get::{ws_connect_state, ws_get_data},
+    commands::arm_service::{
+        csv_exporter::CsvExporter,
+        ws_get::{ws_connect_state, ws_get_data},
+    },
     result_response,
     state::app_state::{AppState, SharedState},
     utils::response::Response,
@@ -53,6 +58,23 @@ pub async fn connect_robot_server<R: tauri::Runtime>(
                 Err(e) => return Err(format!("Failed to create RobotClient: {:?}", e)),
             };
 
+            /*************************************** 初始化csv导出器 *********************/
+            {
+                let mut csv_exporter = robot_lock
+                    .csv_exporter
+                    .write()
+                    .map_err(|op| format!("Failed to acquire csv_exporter lock: {:?}", op))?;
+
+                match CsvExporter::new() {
+                    Ok(exporter) => {
+                        *csv_exporter = Some(exporter);
+                    }
+                    Err(e) => {
+                        return Err(format!("Failed to create CSV exporter: {:?}", e));
+                    }
+                }
+            }
+
             robot_lock.stop_flag.store(false, Ordering::Relaxed);
             // 使用 Arc<Mutex<RobotClient>> 实现线程安全的共享
             let client_arc = Arc::new(Mutex::new(client));
@@ -61,6 +83,7 @@ pub async fn connect_robot_server<R: tauri::Runtime>(
             let stop_flag = robot_lock.stop_flag.clone();
             let observer_running = robot_lock.observer_running.clone();
             let observe_params = robot_lock.observe_params.clone();
+            let csv_exporter = robot_lock.csv_exporter.clone();
 
             let ah = app.app_handle().clone();
             let handler = thread::spawn(move || {
@@ -70,6 +93,9 @@ pub async fn connect_robot_server<R: tauri::Runtime>(
                     // 发送事件
                     if let Ok(packet) = rp {
                         let _ = ah.emit("ROBOT_TCP_DATA", &packet);
+                        if let Some(csv_exporter) = csv_exporter.write().unwrap().as_mut() {
+                            csv_exporter.write_packet(&packet)?;
+                        }
                     } else {
                         eprintln!("Failed to collect data:{:?}", rp.unwrap_err());
                     }
@@ -150,6 +176,15 @@ pub async fn disconnect_robot_server(
                 .push_shared_state()
                 .map_err(|e| format!("Failed to push shared state: {:?}", e))?;
 
+            let mut csv_exporter_rw = robot_lock.csv_exporter.write().unwrap();
+            // 清空临时文件
+            if let Some(csv_exporter) = csv_exporter_rw.as_mut() {
+                csv_exporter
+                    .clear_temp_file()
+                    .map_err(|e| format!("Failed to clear temp file: {:?}", e))?;
+                *csv_exporter_rw = None;
+            }
+
             Ok("Robot server disconnected successfully".to_string())
         } else {
             Err("Failed to acquire client lock".to_string())
@@ -176,6 +211,14 @@ pub fn start_assistant<R: tauri::Runtime>(
 
     if robot_lock.observer_running.load(Ordering::Relaxed) {
         return Response::error("Assistant is already running");
+    }
+
+    let mut csv_exporter_rw = robot_lock.csv_exporter.write().unwrap();
+    // 清空临时文件
+    if let Some(csv_exporter) = csv_exporter_rw.as_mut() {
+        if let Err(e) = csv_exporter.clear_temp_file() {
+            return Response::error(format!("Failed to clear temp file: {:?}", e));
+        }
     }
 
     robot_lock.observer_running.store(true, Ordering::Relaxed);
@@ -239,7 +282,43 @@ pub fn stop_assistant(state: tauri::State<AppState>) -> Response<String> {
     state.set_shared_state(shared_state).unwrap();
     state.push_shared_state().unwrap();
 
+    let csv_exporter = robot_lock.csv_exporter.clone();
+    // 保存csv
+    if let Some(csv_exporter) = csv_exporter.write().unwrap().as_mut() {
+        csv_exporter
+            .save_to(&PathBuf::from("robot_data.csv"))
+            .unwrap();
+    }
+
     Response::success("Assistant stopped successfully".to_string())
+}
+
+#[tauri::command]
+pub fn save_csv(state: tauri::State<AppState>, path: &str) -> Response<String> {
+    let robot_lock = match state.robot_server.read() {
+        Ok(lock) => lock,
+        Err(_) => return Response::error("[save_csv]Failed to acquire lock: robot_server"),
+    };
+
+    // 新增连接状态检查
+    if !robot_lock.connected {
+        return Response::error("请先连接机器人服务器");
+    }
+
+    let csv_exporter_rc = robot_lock.csv_exporter.clone();
+    match csv_exporter_rc.write().unwrap().as_mut() {
+        Some(csv_exporter) => {
+            if let Err(e) = csv_exporter.save_to(&PathBuf::from(path)) {
+                return Response::error(format!("Failed to save csv: {:?}", e));
+            }
+        }
+        None => {
+            // 不存在
+            return Response::error("[save_csv]Failed to acquire lock: csv_exporter");
+        }
+    }
+    // 保存成功
+    Response::success("Save csv successfully".to_string())
 }
 
 #[tauri::command(async)]

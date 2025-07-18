@@ -28,6 +28,7 @@
     "install_now": "立即安装",
     "operation_failed": "操作失败",
     "connect_failed": "连接失败",
+    "download_fail": "下载失败",
     "jointVelocityItems": [
         {
             "value": "target_joint_positions",

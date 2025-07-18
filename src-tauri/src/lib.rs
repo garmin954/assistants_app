@@ -69,6 +69,7 @@ pub fn run() {
             commands::arm_service::start_assistant,
             commands::arm_service::stop_assistant,
             commands::arm_service::get_robot_axis,
+            commands::arm_service::save_csv,
             commands::get_shared_state,
             greet
         ])

@@ -1,6 +1,6 @@
-use crate::commands::arm_service::{robot_client::RobotClient, structs, ws_get::ws_get_data};
-use anyhow::{anyhow, Result};
-use tauri::{AppHandle, Emitter, Manager}; // ← 这个是关键
+use crate::commands::arm_service::{csv_exporter::CsvExporter, robot_client::RobotClient, structs};
+use anyhow::Result;
+use tauri::{AppHandle, Emitter}; // ← 这个是关键
 
 use once_cell::sync::OnceCell;
 
@@ -33,6 +33,8 @@ pub struct RobotServer {
     pub ip: String,
     pub socket: Option<Arc<Mutex<RobotClient>>>,
     pub handle: Option<thread::JoinHandle<Result<(), std::io::Error>>>,
+    // csv导出
+    pub csv_exporter: Arc<RwLock<Option<CsvExporter>>>,
     // 运行状态
     pub observer_running: Arc<AtomicBool>,
     // 连接状态
@@ -90,6 +92,7 @@ impl AppState {
                 connected: false,
                 observe_params: Arc::new(RwLock::new(structs::ObserveParams::default())),
                 stop_flag: Arc::new(AtomicBool::new(false)),
+                csv_exporter: Arc::new(RwLock::new(None)),
             })),
             shared_state: Arc::new(RwLock::new(SharedState::default())),
         }

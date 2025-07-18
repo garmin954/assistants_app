@@ -28,6 +28,7 @@
     "install_now": "Install Now",
     "operation_failed": "Operation failed",
     "connect_failed": "Connect failed",
+    "download_fail": "Download failed",
     "jointVelocityItems": [
         {
             "value": "analysis_joint_positions",
