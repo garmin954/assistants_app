@@ -27,7 +27,6 @@ pub async fn ws_connect_state(ip: &str) -> bool {
         return false;
     }
 
-    println!("连接到 WebSocket 服务器: ====================================================================================================>",);
     // 设置超时时间5s
     let duration = std::time::Duration::from_secs(5);
     let conn = timeout(duration, connect_async(url.unwrap()))
@@ -118,7 +117,6 @@ pub async fn ws_get_data(ip: &str) -> Result<WSSdkData, Box<dyn Error>> {
                     .ok_or_else(|| anyhow!("Missing 'xarm_axis' data"))?;
                 let xarm_axis = data.get(xarm_axis_index).unwrap();
 
-                println!("ft_sensor=================>: {:?}", ft_sensor);
                 // Replace the problematic line with proper error handling
                 let axis = ft_sensor
                     .get("axis")

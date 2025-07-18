@@ -49,6 +49,8 @@ type RefType = {
 };
 
 export default React.forwardRef<RefType, Props>((props, ref) => {
+  console.log('JointChart------------------');
+
   const { t, i18n } = useTranslation();
   const enlargeRef = useRef(null);
   const state = useSelector<RootState, AssistantsState>(
@@ -170,7 +172,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
 
   const chartNameData = useMemo(() => {
     const data: Partial<Record<JointValueKey, string>> = {
-      response_subtract_data: t("response_subtract_data"),
+      difference_data: t("difference_data"),
     };
     (
       t("jointVelocityItems", { returnObjects: true }) as DefaultOptionType[]
@@ -184,13 +186,6 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
   // 更新数据
   function updateChartData(data: ChartJointValueMap, label: number[]) {
     const options = deepClone(CHARTS_OPTIONS);
-    // options.series[0].symbol = "none";
-    if (state.filter_field.observe_type === "xarm_joint_temperatures") {
-      // options.series[0].symbol = "emptyCircle";
-      // options.xAxis.axisLabel.formatter = (value) => {
-      //   return value.slice(11, value.length);
-      // };
-    }
     options.xAxis.data = label;
     // options.xAxis.axisLabel.interval = Math.ceil(label.length / 6);
     options.series = [];
@@ -199,13 +194,14 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
     (Object.keys(data) as JointValueKey[]).forEach((key) => {
       if (
         (state.filter_field.compare === "1" &&
-          key !== "response_subtract_data") ||
+          key !== "difference_data") ||
         (state.filter_field.compare === "0" &&
-          key === "response_subtract_data") ||
+          key === "difference_data") ||
         state.filter_field.mode === "observer"
       ) {
         const d = data[key]!;
         (options.series as any[]).push(setChartSeries(d, chartNameData[key]));
+
         index++;
         if (d[d.length - 1] !== undefined) {
           val.push(d[d.length - 1].toString());
@@ -236,7 +232,6 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
     state.filter_field.compare,
     state.filter_field.mode,
     state.filter_field.unit,
-    state.reporting,
   ]);
 
   const { run: throttledUpdate } = useThrottleFn(updateChartData, {

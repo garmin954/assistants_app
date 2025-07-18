@@ -172,7 +172,7 @@ pub fn process_chart_data(
             vec![op.observe_type]
         }
         Mode::Analysis => {
-            let observe_types = match op.observe_type {
+            let mut observe_types = match op.observe_type {
                 ObserveType::AnalysisJointPositions => {
                     vec![
                         ObserveType::ActualJointPositions,
@@ -192,12 +192,12 @@ pub fn process_chart_data(
                     ]
                 }
                 ObserveType::AnalysisTcpPositions => {
-                    vec![ObserveType::ActualTcpPose, ObserveType::TargetTcpPos]
+                    vec![ObserveType::ActualTcpPose, ObserveType::TargetTcpPose]
                 }
                 ObserveType::AnalysisTcpVelocities => {
                     vec![
                         ObserveType::ActualTcpVelocity,
-                        ObserveType::TargetTcpVelocities,
+                        ObserveType::TargetTcpVelocity,
                     ]
                 }
                 _ => {
@@ -207,6 +207,7 @@ pub fn process_chart_data(
                     ));
                 }
             };
+            observe_types.push(ObserveType::DifferenceData);
             observe_types
         }
     };
@@ -214,7 +215,7 @@ pub fn process_chart_data(
     let mut data: Vec<ChartData> = vec![];
     for ot in choose_ot {
         let value: Vec<f32> = match ot {
-            ObserveType::TargetJointPositions => packet.actual_joint_positions.clone().to_vec(),
+            ObserveType::TargetJointPositions => packet.target_joint_positions.clone().to_vec(),
             ObserveType::TargetJointVelocities => packet.target_joint_velocities.clone().to_vec(),
             ObserveType::TargetJointAccelerations => {
                 packet.target_joint_accelerations.clone().to_vec()
@@ -225,16 +226,72 @@ pub fn process_chart_data(
                 packet.actual_joint_accelerations.clone().to_vec()
             }
             ObserveType::ActualJointCurrents => packet.actual_joint_currents.clone().to_vec(),
-            ObserveType::ActualJointTorques => packet.estimated_joint_torques.clone().to_vec(),
-            ObserveType::TargetTcpPos => packet.target_tcp_pose.clone().to_vec(),
-            ObserveType::TargetTcpVelocities => packet.target_tcp_velocity.clone().to_vec(),
+
+            ObserveType::TargetTcpPose => packet.target_tcp_pose.clone().to_vec(),
             ObserveType::ActualTcpPose => packet.actual_tcp_pose.clone().to_vec(),
+
+            ObserveType::TargetTcpVelocity => packet.target_tcp_velocity.clone().to_vec(),
             ObserveType::ActualTcpVelocity => packet.actual_tcp_velocity.clone().to_vec(),
+
             ObserveType::EstimatedTcpTorque => packet.estimated_tcp_torque.clone().to_vec(),
+            ObserveType::EstimatedJointTorque => packet.estimated_joint_torque.clone().to_vec(),
             ObserveType::DataTorqueSensor => packet.data_torque_sensor.clone().to_vec(),
             ObserveType::FilteredDataTorqueSensor => {
                 packet.filtered_data_torque_sensor.clone().to_vec()
             }
+            ObserveType::DifferenceData => match op.observe_type {
+                ObserveType::AnalysisJointPositions => {
+                    let a = packet.actual_joint_positions.clone().to_vec();
+                    let t = packet.target_joint_positions.clone().to_vec();
+                    let mut diff = vec![];
+                    for (i, j) in a.iter().zip(t.iter()) {
+                        diff.push(*i - *j);
+                    }
+                    diff
+                }
+                ObserveType::AnalysisJointVelocities => {
+                    let a = packet.actual_joint_velocities.clone().to_vec();
+                    let t = packet.target_joint_velocities.clone().to_vec();
+                    let mut diff = vec![];
+                    for (i, j) in a.iter().zip(t.iter()) {
+                        diff.push(*i - *j);
+                    }
+                    diff
+                }
+                ObserveType::AnalysisJointAccelerations => {
+                    let a = packet.actual_joint_accelerations.clone().to_vec();
+                    let t = packet.target_joint_accelerations.clone().to_vec();
+                    let mut diff = vec![];
+                    for (i, j) in a.iter().zip(t.iter()) {
+                        diff.push(*i - *j);
+                    }
+                    diff
+                }
+                ObserveType::AnalysisTcpPositions => {
+                    let a = packet.actual_tcp_pose.clone().to_vec();
+                    let t = packet.target_tcp_pose.clone().to_vec();
+                    let mut diff = vec![];
+                    for (i, j) in a.iter().zip(t.iter()) {
+                        diff.push(*i - *j);
+                    }
+                    diff
+                }
+                ObserveType::AnalysisTcpVelocities => {
+                    let a = packet.actual_tcp_velocity.clone().to_vec();
+                    let t = packet.target_tcp_velocity.clone().to_vec();
+                    let mut diff = vec![];
+                    for (i, j) in a.iter().zip(t.iter()) {
+                        diff.push(*i - *j);
+                    }
+                    diff
+                }
+                _ => {
+                    return Err(io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        "无法读取观测参数",
+                    ));
+                }
+            },
             _ => {
                 return Err(io::Error::new(
                     io::ErrorKind::InvalidData,

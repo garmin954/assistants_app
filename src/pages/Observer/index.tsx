@@ -3,7 +3,7 @@ import Nav from "./Nav";
 import Chart from "./Chart";
 
 function ObserverChart() {
-  console.log("ObserverChart==>");
+  console.log("ObserverChart------------------");
 
   return (
     <main className="bg-background text-foreground h-full">

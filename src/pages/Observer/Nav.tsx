@@ -19,7 +19,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootDispatch, RootState } from "@/store";
 import { AssistantsState } from "@/store/features/assistants";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { ChartWorker } from "@/lib/worker";
 
 const Languages = [
   {
@@ -32,7 +31,6 @@ const Languages = [
   },
 ];
 
-const worker = ChartWorker.getInstance();
 
 export default function Nav() {
   const { t, i18n } = useTranslation();
@@ -49,9 +47,6 @@ export default function Nav() {
   // 切换语言
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
-    worker.postMessage({
-      type: "post_chart_data",
-    });
     getCurrentWindow().setTitle(t("appTitle"));
   };
 

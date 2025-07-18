@@ -41,7 +41,7 @@ pub struct RobotDataPacket {
     pub actual_joint_currents: [f32; 7],
 
     /// 估算关节扭矩（ByteOffset: 229, ByteLength: 28, Type: FP32[7]）N·m
-    pub estimated_joint_torques: [f32; 7],
+    pub estimated_joint_torque: [f32; 7],
 
     /// 预留（用于关节信息）（ByteOffset: 257, ByteLength: 168, Type: FP32[42]）
     pub reserved_joint: [f32; 42],
@@ -94,7 +94,7 @@ impl RobotDataPacket {
         let actual_joint_velocities = Self::read_f32_array::<7>(&mut cursor)?;
         let actual_joint_accelerations = Self::read_f32_array::<7>(&mut cursor)?;
         let actual_joint_currents = Self::read_f32_array::<7>(&mut cursor)?;
-        let estimated_joint_torques = Self::read_f32_array::<7>(&mut cursor)?;
+        let estimated_joint_torque = Self::read_f32_array::<7>(&mut cursor)?;
 
         let reserved_joint = Self::read_f32_array::<42>(&mut cursor)?;
 
@@ -122,7 +122,7 @@ impl RobotDataPacket {
             actual_joint_velocities,
             actual_joint_accelerations,
             actual_joint_currents,
-            estimated_joint_torques,
+            estimated_joint_torque,
             reserved_joint,
             target_tcp_pose,
             target_tcp_velocity,

@@ -11,25 +11,6 @@ pub struct CsvExporter {
 impl CsvExporter {
     pub fn new(path: &str) -> io::Result<Self> {
         let mut writer = Writer::from_path(path)?;
-
-        // 写入 CSV 标题行
-        writer.write_record(&[
-            "timestamp",
-            "joint1_current",
-            "joint2_current",
-            "joint3_current",
-            "joint4_current",
-            "joint5_current",
-            "joint6_current",
-            "joint7_current",
-            "tcp_x",
-            "tcp_y",
-            "tcp_z",
-            "tcp_rx",
-            "tcp_ry",
-            "tcp_rz",
-        ])?;
-
         Ok(Self { writer })
     }
 

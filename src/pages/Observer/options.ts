@@ -21,7 +21,7 @@ const JOINT_FIELDS = [
     'actual_joint_velocities',
     'actual_joint_accelerations',
     'actual_joint_currents',
-    'estimated_joint_torques',
+    'estimated_joint_torque',
     'xarm_joint_temperatures',
 ]
 
@@ -46,7 +46,7 @@ const TCP_POSITION_FIELD = [
 ]
 // 力矩的字段
 const MOMENT_POSITION_FIELD = [
-    'estimated_tcp_torques',
+    'estimated_tcp_torque',
     'data_torque_sensor',
     'filtered_data_torque_sensor',
 ]
@@ -78,24 +78,24 @@ export const ARM_JOINT_TYPE_UNIT = {
     // 实际关节电流
     'actual_joint_currents': gur(['A', 8]),
     // 电流估算的关节力矩
-    'estimated_joint_torques': gur(['N·m', 8]),
+    'estimated_joint_torque': gur(['N·m', 8]),
     // 规划TCP位置
     'target_tcp_pose': gur(['mm', 3], ['rad', 3]),
     // 规划TCP速度
-    'target_tcp_speed': gur(['mm/s', 3], ['rad/s', 3]),
+    'target_tcp_velocity': gur(['mm/s', 3], ['rad/s', 3]),
     // 实际TCP位置
     'actual_tcp_pose': gur(['mm', 3], ['rad', 3]),
     // 实际TCP速度
-    'actual_tcp_speed': gur(['mm/s', 3], ['rad/s', 3]),
+    'actual_tcp_velocity': gur(['mm/s', 3], ['rad/s', 3]),
     // 电流估算的TCP力矩
-    'estimated_tcp_torques': gur(['N', 3], ['N·m', 3]),
+    'estimated_tcp_torque': gur(['N', 3], ['N·m', 3]),
     // 力矩传感器(原始值)
     'data_torque_sensor': gur(['N', 3], ['N·m', 3]),
     // 力矩传感器(滤波值)
     'filtered_data_torque_sensor': gur(['N', 3], ['N·m', 3]),
     // 关节温度
     'xarm_joint_temperatures': gur(['℃', 8]),
-    'response_subtract_data': gur(['rad', 8]),
+    'difference_data': gur(['rad', 8]),
 }
 
 export const MODE_JOINT_TYPE = Object.keys(ARM_JOINT_TYPE_UNIT) as (keyof typeof ARM_JOINT_TYPE_UNIT)[]
@@ -196,10 +196,50 @@ export type DefaultOptionType = {
     label: string
 }
 
-export type ChartJointValueMap = Partial<Record<keyof typeof ARM_JOINT_TYPE_UNIT | 'response_subtract_data', number[]>>
-export type JointValueKey = Partial<keyof typeof ARM_JOINT_TYPE_UNIT | 'response_subtract_data'>
+export type ChartJointValueMap = Partial<Record<keyof typeof ARM_JOINT_TYPE_UNIT | 'difference_data', number[]>>
+export type JointValueKey = Partial<keyof typeof ARM_JOINT_TYPE_UNIT | 'difference_data'>
 export type ObserveChartDate = Record<0 | 1 | 2 | 3 | 4 | 5 | 6, ChartJointValueMap>
 export type ObserveTypeData = {
     type: keyof ChartJointValueMap,
     value: number[]
+}
+
+
+// 分析类型对应的字段
+export function getObserveTypes(observeType: JointValueKey): JointValueKey[] {
+    switch (observeType) {
+        case "analysis_joint_positions":
+            return [
+                "target_joint_positions",
+                "actual_joint_positions"
+            ]
+            break;
+        case "analysis_joint_velocities":
+            return [
+                "target_joint_velocities",
+                "actual_joint_velocities"
+            ]
+            break;
+        case "analysis_joint_accelerations":
+            return [
+                "target_joint_accelerations",
+                "actual_joint_accelerations"
+            ]
+            break;
+        case "analysis_tcp_positions":
+            return [
+                "actual_tcp_pose",
+                "actual_tcp_pose"
+            ]
+            break;
+        case "analysis_tcp_velocities":
+            return [
+                "target_tcp_velocity",
+                "actual_tcp_velocity"
+            ]
+            break;
+        default:
+            return [observeType]
+            break;
+    }
 }

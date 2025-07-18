@@ -18,7 +18,7 @@
     "analysis": "Analysis",
     "compare": "Compare",
     "differential": "Difference",
-    "response_subtract_data": "Difference",
+    "difference_data": "Difference",
     "start_server_tip": "The current service is not enabled",
     "start_server": "Start Server",
     "version_title": "Version Updater",
@@ -58,7 +58,7 @@
             "label": "Actual Joint Currents"
         },
         {
-            "value": "estimated_joint_torques",
+            "value": "estimated_joint_torque",
             "label": "Estimated Joint Torques"
         },
         {

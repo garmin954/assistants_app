@@ -18,12 +18,12 @@ pub enum ObserveType {
     ActualJointVelocities,      // 实际关节速度，rad/s，7个关节
     ActualJointAccelerations,   // 实际关节加速度，rad/s^2，7个关节
     ActualJointCurrents,        // 实际关节电流，A，7个关节
-    ActualJointTorques,         // 实际关节力矩，N*m，7个关节
-    TargetTcpPos,               // 规划TCP位置，mm，6个坐标
-    TargetTcpVelocities,        // 规划TCP速度，mm/s，6个坐标
+    TargetTcpPose,              // 规划TCP位置，mm，6个坐标
     ActualTcpPose,              // 实际TCP位姿，mm，6个坐标
+    TargetTcpVelocity,          // 规划TCP速度，mm/s，6个坐标
     ActualTcpVelocity,          // 实际TCP速度，mm/s，6个坐标
     EstimatedTcpTorque,         // 估计TCP力矩，N*m，6个坐标
+    EstimatedJointTorque,       // 估计关节力矩，N*m，7个关节
     DataTorqueSensor,           // 力矩传感器原始6D力/力矩，N*m，6个坐标
     FilteredDataTorqueSensor,   // 力矩传感器滤波6D力/力矩，N*m，6个坐标
     AnalysisJointPositions,     // 分析关节位置
@@ -31,6 +31,7 @@ pub enum ObserveType {
     AnalysisJointAccelerations, // 分析关节加速度
     AnalysisTcpPositions,       // 分析TCP位置
     AnalysisTcpVelocities,      // 分析TCP速度
+    DifferenceData,             // 差值数据
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -66,7 +67,7 @@ pub enum Hertz {
     Hz250 = 250,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ObserveParams {
     pub mode: Mode,                  // 模式 观测（observer）/分析(analysis)
     pub observe_type: ObserveType,   // 观测类型 关节/位置/速度/力矩/力

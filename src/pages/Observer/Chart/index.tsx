@@ -9,76 +9,94 @@ import { Spin } from "antd";
 import { listen } from "@tauri-apps/api/event";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { AssistantsState } from "@/store/features/assistants";
-import { useOptions } from "../FilterCriteria/useOptions";
 import { OPTION_EMPTY } from "@/lib/constant";
-import { cn } from "@/lib/utils";
+import { cn, deepClone } from "@/lib/utils";
 import {
-  ChartJointValueMap,
   ObserveChartDate,
   ObserveTypeData,
   JointValueKey,
+  getObserveTypes,
 } from "../options";
 
 const JointChart = React.lazy(() => import("./JointChart"));
-
 const MAX_LENGTH = 6000;
+const DEFAULT_DATA = {
+  0: {},
+  1: {},
+  2: {},
+  3: {},
+  4: {},
+  5: {},
+  6: {},
+}
 
 export default () => {
-  const state = useSelector<RootState, AssistantsState>(
-    (state) => state.assistants
+  console.log("Chart------------------");
+
+  const jointDir = useSelector<RootState, string>(
+    (state) => state.assistants.filter_field.joint_dir
   );
-  const { jointOrCoordinateOptions } = useOptions(state);
+  const observeType = useSelector<RootState, JointValueKey>(
+    (state) => state.assistants.filter_field.observe_type as JointValueKey
+  );
+  const axis = useSelector<RootState, number>(
+    (state) => state.app.shared_state.axis
+  );
+
+  const observering = useSelector<RootState, boolean>(
+    (state) => state.app.shared_state.observering
+  );
 
   const echartsRef = useRef<Record<number, any>>({});
-  const chartDataRef = useRef<ObserveChartDate>({
-    0: {},
-    1: {},
-    2: {},
-    3: {},
-    4: {},
-    5: {},
-    6: {},
-  });
+  const chartDataRef = useRef<ObserveChartDate>(deepClone(DEFAULT_DATA));
   const rafRef = useRef<number | null>(null);
 
-  const currentType = useRef<JointValueKey>("target_joint_positions");
+
+  useEffect(() => {
+    if (observering) {
+      chartDataRef.current = deepClone(DEFAULT_DATA);
+    }
+  }, [observering])
 
   // 获取某关节某类型数据
-  const getSeries = useCallback(
-    (jointIndex: number, type: JointValueKey): number[] => {
-      // @ts-ignore
-      return chartDataRef.current[jointIndex]?.[type] || [];
+  const getJointSeries = useCallback(
+    (jointIndex: number, type: JointValueKey[]): Record<JointValueKey, number[]> => {
+      const data: Record<JointValueKey, number[]> = {} as Record<JointValueKey, number[]>;
+      type.push('difference_data');
+      type.forEach((t) => {
+        data[t] = [...(chartDataRef.current[jointIndex as keyof ObserveChartDate]?.[t] || [])]
+      })
+      return data;
     },
     []
   );
 
   useEffect(() => {
-    let unlisten = () => {};
-
-    listen("robot-data", ({ payload }) => {
+    let unlisten = () => { };
+    // 获取关节实时数据
+    listen("ROBOT_TCP_DATA", ({ payload }) => {
       const { data } = payload as Record<"data", ObserveTypeData[]>;
       if (!data?.length) return;
 
+
+      // 设置数据
       data.forEach(({ type, value }) => {
         value.forEach((v, i) => {
-          // @ts-ignore
-          const jointData = chartDataRef.current[i];
-          if (!jointData[type]) jointData[type] = [];
+          const jointData = chartDataRef.current[i as keyof ObserveChartDate];
+          if (!(type in jointData)) jointData[type] = [];
           jointData[type]!.push(v);
           if (jointData[type]!.length > MAX_LENGTH) jointData[type]!.shift();
         });
       });
 
+      // 更新图表数据
       if (rafRef.current === null) {
         rafRef.current = requestAnimationFrame(() => {
-          const type = currentType.current;
+          const types = getObserveTypes(observeType);
+          // 遍历所有图表
           Object.entries(echartsRef.current).forEach(([key, chart]) => {
-            const jointIndex = Number(key);
-            const data: ChartJointValueMap = {
-              [type]: getSeries(jointIndex, type),
-            };
-            chart?.update(data);
+            // 图表更新
+            chart?.update(getJointSeries(Number(key), types));
           });
           rafRef.current = null;
         });
@@ -89,14 +107,14 @@ export default () => {
       unlisten();
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [getSeries]);
+  }, [getJointSeries, observeType]);
 
   const charts = useMemo(() => {
-    if (state.filter_field.joint_dir !== OPTION_EMPTY) {
+    if (jointDir !== OPTION_EMPTY) {
       return new Array(1).fill({});
     }
-    return new Array(jointOrCoordinateOptions.length - 1).fill({});
-  }, [state.filter_field.joint_dir, jointOrCoordinateOptions]);
+    return new Array(axis).fill({});
+  }, [jointDir, axis]);
 
   const LoadingTmp = <Spin spinning={true} size="large" className="mt-[20%]" />;
 
@@ -111,14 +129,12 @@ export default () => {
       >
         {charts.map((_, index) => {
           const jointIndex =
-            charts.length === 1 ? +state.filter_field.joint_dir : index;
+            charts.length === 1 ? +jointDir : index;
 
           return (
             <JointChart
               index={jointIndex}
               key={`chart-${jointIndex}`}
-              // @ts-ignore
-              getChartData={() => {}}
               ref={(r: any) => {
                 if (r) echartsRef.current[jointIndex] = r;
               }}

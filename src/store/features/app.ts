@@ -15,10 +15,11 @@ const slice = createSlice({
             extensions: createElement('div', {}, ''),
         },
 
-        sharedData: {
+        shared_state: {
             axis: 0,
-            ft_sensor: [0, 0],
-            arm_conn: false
+            ft_sensor: false,
+            arm_conn: false,
+            observering: false,
         }
     },
     reducers: {
@@ -27,11 +28,12 @@ const slice = createSlice({
         },
 
         setSharedData(state, action) {
-            const { arm_conn, axis, ft_sensor } = action.payload;
+            const { arm_conn, axis, ft_sensor, observering } = action.payload;
 
-            state.sharedData.arm_conn = arm_conn;
-            state.sharedData.axis = axis;
-            state.sharedData.ft_sensor = ft_sensor;
+            state.shared_state.arm_conn = arm_conn;
+            state.shared_state.axis = axis;
+            state.shared_state.ft_sensor = ft_sensor;
+            state.shared_state.observering = observering;
         }
 
     }

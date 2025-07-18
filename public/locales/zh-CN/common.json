@@ -18,7 +18,7 @@
     "analysis": "分析",
     "compare": "对比",
     "differential": "差值",
-    "response_subtract_data": "差值",
+    "difference_data": "差值",
     "start_server_tip": "当前服务未开启",
     "start_server": "开启服务",
     "version_title": "版本更新",
@@ -58,7 +58,7 @@
             "label": "实际关节电流"
         },
         {
-            "value": "estimated_joint_torques",
+            "value": "estimated_joint_torque",
             "label": "电流估算的关节力矩"
         },
         {

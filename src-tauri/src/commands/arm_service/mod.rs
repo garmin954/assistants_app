@@ -9,6 +9,7 @@ pub mod ws_get;
 use std::{
     sync::{atomic::Ordering, Arc, Mutex},
     thread,
+    time::Duration,
 };
 
 use robot_client::RobotClient;
@@ -68,7 +69,7 @@ pub async fn connect_robot_server<R: tauri::Runtime>(
                 client.collect_data(stop_flag, observer_running, observe_params, |rp| {
                     // 发送事件
                     if let Ok(packet) = rp {
-                        let _ = ah.emit("robot-data", &packet);
+                        let _ = ah.emit("ROBOT_TCP_DATA", &packet);
                     } else {
                         eprintln!("Failed to collect data:{:?}", rp.unwrap_err());
                     }
@@ -159,7 +160,8 @@ pub async fn disconnect_robot_server(
 }
 
 #[tauri::command]
-pub fn start_assistant(
+pub fn start_assistant<R: tauri::Runtime>(
+    app: tauri::AppHandle<R>,
     state: tauri::State<AppState>,
     params: structs::ObserveParams,
 ) -> Response<String> {
@@ -183,14 +185,32 @@ pub fn start_assistant(
         Err(_) => return Response::error("Failed to acquire lock"),
     };
 
-    *params_write = params;
+    *params_write = params.clone();
 
     /*************************** 读取并更新shared_state *************************** */
-    let mut shared_state = state.shared_state.clone().read().unwrap().clone();
-    shared_state.observering = true;
+    {
+        let mut shared_state = state.shared_state.clone().read().unwrap().clone();
+        shared_state.observering = true;
 
-    state.set_shared_state(shared_state).unwrap();
-    state.push_shared_state().unwrap();
+        state.set_shared_state(shared_state).unwrap();
+        state.push_shared_state().unwrap();
+    }
+
+    /*************** 在后台线程中，timeout秒后将 observering = false 并更新状态 ***************/
+    let params = params.clone();
+    let observer_running = robot_lock.observer_running.clone();
+
+    thread::spawn(move || {
+        thread::sleep(Duration::from_secs(params.timeout));
+        let app = app.app_handle().clone();
+        let state = app.state::<AppState>();
+
+        let mut shared_state = state.shared_state.read().unwrap().clone();
+        shared_state.observering = false;
+        observer_running.store(false, Ordering::Relaxed);
+        let _ = state.set_shared_state(shared_state);
+        let _ = state.push_shared_state();
+    });
 
     Response::success("Assistant started successfully".to_string())
 }

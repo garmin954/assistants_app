@@ -15,14 +15,10 @@ export default function LayoutContainer() {
   useEffect(() => {
     let unListen: () => void;
     listen("APP_SHARED_STATE", (rs) => {
-      console.log('APP_SHARED_STATE==>', rs);
-
       dispatch(setSharedData(rs.payload));
     }).then((r) => (unListen = r));
 
-    invoke("get_shared_state").then((rs) => {
-      console.log('get_shared_state==>', rs);
-    });
+    invoke("get_shared_state")
     return () => {
       unListen?.();
     };
