@@ -29,6 +29,7 @@ const DEFAULT_DATA = {
   5: {},
   6: {},
 }
+const UPDATE_INTERVAL = 100; // 100ms更新一次
 
 export default () => {
   console.log("Chart------------------");
@@ -46,11 +47,10 @@ export default () => {
   const observering = useSelector<RootState, boolean>(
     (state) => state.app.shared_state.observering
   );
-
+  const lastUpdateRef = useRef(0);
   const echartsRef = useRef<Record<number, any>>({});
   const chartDataRef = useRef<ObserveChartDate>(deepClone(DEFAULT_DATA));
   const rafRef = useRef<number | null>(null);
-
 
   useEffect(() => {
     if (observering) {
@@ -60,9 +60,15 @@ export default () => {
 
   // 获取某关节某类型数据
   const getJointSeries = useCallback(
-    (jointIndex: number, type: JointValueKey[]): Record<JointValueKey, number[]> => {
+    (
+      jointIndex: number,
+      type: JointValueKey[],
+      observeType: JointValueKey
+    ): Record<JointValueKey, number[]> => {
       const data: Record<JointValueKey, number[]> = {} as Record<JointValueKey, number[]>;
-      type.push('difference_data');
+      if (observeType.startsWith("analysis")) {
+        type.push('difference_data');
+      }
       type.forEach((t) => {
         data[t] = [...(chartDataRef.current[jointIndex as keyof ObserveChartDate]?.[t] || [])]
       })
@@ -78,7 +84,6 @@ export default () => {
       const { data } = payload as Record<"data", ObserveTypeData[]>;
       if (!data?.length) return;
 
-
       // 设置数据
       data.forEach(({ type, value }) => {
         value.forEach((v, i) => {
@@ -91,15 +96,17 @@ export default () => {
 
       // 更新图表数据
       if (rafRef.current === null) {
-        rafRef.current = requestAnimationFrame(() => {
-          const types = getObserveTypes(observeType);
-          // 遍历所有图表
-          Object.entries(echartsRef.current).forEach(([key, chart]) => {
-            // 图表更新
-            chart?.update(getJointSeries(Number(key), types));
+        const now = Date.now();
+        if (now - lastUpdateRef.current > UPDATE_INTERVAL) {
+          rafRef.current = requestAnimationFrame(() => {
+            const types = getObserveTypes(observeType);
+            Object.entries(echartsRef.current).forEach(([key, chart]) => {
+              chart?.update(getJointSeries(Number(key), types, observeType));
+            });
+            lastUpdateRef.current = now;
+            rafRef.current = null;
           });
-          rafRef.current = null;
-        });
+        }
       }
     }).then((un) => (unlisten = un));
 
@@ -113,7 +120,7 @@ export default () => {
     if (jointDir !== OPTION_EMPTY) {
       return new Array(1).fill({});
     }
-    return new Array(axis).fill({});
+    return new Array(axis < 7 ? axis : 6).fill({});
   }, [jointDir, axis]);
 
   const LoadingTmp = <Spin spinning={true} size="large" className="mt-[20%]" />;

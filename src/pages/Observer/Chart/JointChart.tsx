@@ -235,7 +235,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
   ]);
 
   const { run: throttledUpdate } = useThrottleFn(updateChartData, {
-    wait: 30,
+    wait: 180,
     leading: true,
   });
   useImperativeHandle(ref, () => ({ update: throttledUpdate }));

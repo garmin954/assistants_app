@@ -2,6 +2,7 @@ export const CHARTS_OPTIONS = {
     useWorker: true,
     progressive: 500,           // 渐进式渲染，每帧渲染点数
     progressiveThreshold: 3000, // 超过该阈值时启用渐进式渲染
+    animation: false,
     renderer: 'canvas',
     grid: {
         top: '5%',    // 上边距
@@ -47,7 +48,6 @@ export const CHARTS_OPTIONS = {
             }
         }
     },
-    animation: false,
     tooltip: {
         trigger: 'axis', // 触发类型，'axis' 表示横轴触发
         // triggerOn: "click",
