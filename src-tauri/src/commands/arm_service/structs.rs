@@ -8,7 +8,7 @@ pub enum Mode {
     Analysis,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum ObserveType {
     TargetJointPositions,       // 规划关节位置，rad，7个关节
@@ -33,11 +33,34 @@ pub enum ObserveType {
     AnalysisTcpVelocities,      // 分析TCP速度
     DifferenceData,             // 差值数据
 }
+// impl PartialEq for ObserveType {
+//     fn eq(&self, other: &Self) -> bool {
+//         self == other
+//     }
+// }
+
+pub const SHOW_RAD_TYPE: &[ObserveType] = &[
+    ObserveType::TargetJointPositions,
+    ObserveType::TargetJointVelocities,
+    ObserveType::TargetJointAccelerations,
+    ObserveType::ActualJointPositions,
+    ObserveType::ActualJointVelocities,
+    ObserveType::ActualJointAccelerations,
+    ObserveType::TargetTcpPose,
+    ObserveType::TargetTcpVelocity,
+    ObserveType::ActualTcpPose,
+    ObserveType::ActualTcpVelocity,
+    ObserveType::AnalysisJointPositions,
+    ObserveType::AnalysisJointVelocities,
+    ObserveType::AnalysisJointAccelerations,
+    ObserveType::AnalysisTcpPositions,
+    ObserveType::AnalysisTcpVelocities,
+];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Unit {
-    Degree,
+    Angle,
     Radian,
 }
 
@@ -84,7 +107,7 @@ impl Default for ObserveParams {
             mode: Mode::Observer,                            // 默认观测模式
             observe_type: ObserveType::TargetJointPositions, // 默认观测关节
             joint_dir: JointOrDirection::All,                // 默认观测第全部关节
-            unit: Unit::Degree,                              // 默认角度单位
+            unit: Unit::Angle,                               // 默认角度单位
             hz: Hertz::Hz200,                                // 默认频率200Hz
             timeout: 5000,                                   // 默认超时5000ms
             csv: false,                                      // 默认不保存为csv文件

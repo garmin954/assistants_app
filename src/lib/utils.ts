@@ -161,3 +161,13 @@ export function isPointInsideDiv(point: Point, div: HTMLElement) {
     point.y <= rect.bottom
   );
 }
+
+
+
+export const toRadian = (degree: number) => {
+  return Math.PI / 180 * degree;
+}
+// toAngle
+export const toAngle = (radian: number) => {
+  return radian / Math.PI * 180;
+}

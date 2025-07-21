@@ -26,8 +26,8 @@ export const SELECTED_FIELD = {
     csv: false,                                 // 是否保存为csv文件
     observer: false,                            // 是否开启观测
     type: "0",
-    unit: 'degree',                             // 单位
-    timeout: 100,                                  // 超时时间
+    unit: 'angle',                             // 单位
+    timeout: 100,                               // 超时时间
     mode: 'observer',                           // 模式
     compare: "1",                               // 比较模式
 }
@@ -165,8 +165,6 @@ const slice = createSlice({
         },
         setSelectedField: (state, action) => {
             const { mode, observe_type, joint_dir, unit, hz, timeout, csv, observer, compare } = action.payload;
-
-            console.log("setSelectedField==>", action.payload);
 
             // 设置角度/弧度 (仅当 unit 有值时执行)
             if (unit !== undefined && unit !== state.filter_field.unit) {

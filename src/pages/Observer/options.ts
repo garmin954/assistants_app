@@ -40,9 +40,9 @@ const ANALYSIS_TCP_POSITION_FIELDS = [
 // TCP的字段
 const TCP_POSITION_FIELD = [
     'target_tcp_pose',
-    'target_tcp_speed',
+    'target_tcp_velocity',
     'actual_tcp_pose',
-    'actual_tcp_speed',
+    'actual_tcp_velocity',
 ]
 // 力矩的字段
 const MOMENT_POSITION_FIELD = [
@@ -97,6 +97,7 @@ export const ARM_JOINT_TYPE_UNIT = {
     'xarm_joint_temperatures': gur(['℃', 8]),
     'difference_data': gur(['rad', 8]),
 }
+export type JDS = 'jd1' | 'jd2' | 'jd3' | 'jd4' | 'jd5' | 'jd6' | 'jd7'
 
 export const MODE_JOINT_TYPE = Object.keys(ARM_JOINT_TYPE_UNIT) as (keyof typeof ARM_JOINT_TYPE_UNIT)[]
 // 关节 options
@@ -121,12 +122,12 @@ export const TCP_UNIT_OPTIONS = [
 ]
 // 力矩options
 export const MOMENT_UNIT_OPTIONS = [
-    { value: '1', label: 'Fx' },
-    { value: '2', label: 'Fy' },
-    { value: '3', label: 'Fz' },
-    { value: '4', label: 'Tx' },
-    { value: '5', label: 'Ty' },
-    { value: '6', label: 'Tz' },
+    { value: 'jd1', label: 'Fx' },
+    { value: 'jd2', label: 'Fy' },
+    { value: 'jd3', label: 'Fz' },
+    { value: 'jd4', label: 'Tx' },
+    { value: 'jd5', label: 'Ty' },
+    { value: 'jd6', label: 'Tz' },
 ]
 
 // 显示rad弧度的字段
@@ -138,9 +139,9 @@ export const SHOW_RAD_TYPE = [
     'actual_joint_velocities',
     'actual_joint_accelerations',
     'target_tcp_pose',
-    'target_tcp_speed',
+    'target_tcp_velocity',
     'actual_tcp_pose',
-    'actual_tcp_speed',
+    'actual_tcp_velocity',
     'analysis_joint_positions',
     'analysis_joint_velocities',
     'analysis_joint_accelerations',
@@ -198,7 +199,7 @@ export type DefaultOptionType = {
 
 export type ChartJointValueMap = Partial<Record<keyof typeof ARM_JOINT_TYPE_UNIT | 'difference_data', number[]>>
 export type JointValueKey = Partial<keyof typeof ARM_JOINT_TYPE_UNIT | 'difference_data'>
-export type ObserveChartDate = Record<0 | 1 | 2 | 3 | 4 | 5 | 6, ChartJointValueMap>
+export type ObserveChartDate = Record<JDS, ChartJointValueMap>
 export type ObserveTypeData = {
     type: keyof ChartJointValueMap,
     value: number[]

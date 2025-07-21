@@ -128,6 +128,7 @@ impl AppState {
 }
 
 // 获取全局的app 实例
+#[allow(dead_code)]
 pub fn get_app_handle() -> Result<Arc<AppHandle<tauri::Wry>>> {
     GLOBAL_APP_HANDLE
         .get()

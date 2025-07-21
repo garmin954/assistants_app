@@ -26,6 +26,7 @@ import { AssistantsState } from "@/store/features/assistants";
 import { CHARTS_OPTIONS, setChartSeries } from "./config";
 import { deepClone } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { ECBasicOption } from "echarts/types/dist/shared";
 
 echarts.use([
   GridComponent,
@@ -40,8 +41,7 @@ echarts.use([
 ]);
 
 interface Props {
-  index: number;
-  // getChartData: () => void;
+  index: string;
 }
 
 type RefType = {
@@ -88,7 +88,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
     };
   }, [echartsRef.current]);
   const selectedPoints = useRef<
-    { key: string; value: string; name: string; coord: string[] }[][]
+    { key: string; value: string; name: string; coord: number[] }[][]
   >([[], []]);
   function openSeriesDot(params: echarts.ECElementEvent) {
     const index: 0 | 1 = (params.seriesIndex as 0 | 1) ?? 0;
@@ -108,10 +108,9 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
           key,
           name: params.name,
           value: params.value as string,
-          coord: [params.name, params.value + ""], // 存储坐标信息
+          coord: [+params.name, +(params.value ?? 0)], // 存储坐标信息
         });
       }
-
       // 更新markPoint数据
       updateMarkPoints();
     }
@@ -119,7 +118,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
 
   // 更新点位标记
   function updateMarkPoints() {
-    const config: any[] = [];
+    const config = chart.current?.getOption() as ECBasicOption;
     selectedPoints.current.forEach((item, index) => {
       const markPointData = item.map((point) => ({
         name: point.name,
@@ -143,17 +142,19 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
           shadowColor: "rgba(0,0,0,0.1)",
         },
       }));
-      config[index] = {
-        markPoint: {
-          data: markPointData,
-        },
-      };
+
+      // @ts-ignore
+      if (config && config.series[index]) {
+        // @ts-ignore
+        config.series[index].markPoint.data = markPointData
+      }
     });
     // 更新图表
     chart.current?.setOption({
-      series: config,
+      ...config,
     });
   }
+
   // 缩放
   const size = useSize(enlargeRef);
   useEffect(() => {
@@ -164,8 +165,6 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
   function setCharts(set = false) {
     if (set) {
       chart.current?.setOption(CHARTS_OPTIONS);
-      // setCurVal("0");
-      // props.getChartData();
     }
     chart.current?.resize();
   }
@@ -221,7 +220,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
     const option = optionsCorrespondingToParameters(
       state.filter_field.observe_type as keyof typeof ARM_JOINT_TYPE_UNIT
     );
-    const item = option.find((v) => +v.value === +props.index);
+    const item = option.find((v) => v.value === props.index);
     return item?.label || null;
   }, [props.index, state.filter_field.observe_type]);
 
@@ -239,6 +238,7 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
     leading: true,
   });
   useImperativeHandle(ref, () => ({ update: throttledUpdate }));
+
   return (
     <div ref={enlargeRef} className="bg-card rounded-lg shadow-sm pt-6 pb-12">
       <div className="chart-unit  uf-font-medium flex justify-between">

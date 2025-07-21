@@ -84,5 +84,8 @@ export function setChartSeries(data: number[], name = "") {
             borderWidth: 1
         },
         seriesLayoutBy: 'row',
+        markPoint: {
+            data: []
+        },
     }
 }

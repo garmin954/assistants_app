@@ -249,7 +249,15 @@ pub fn start_assistant<R: tauri::Runtime>(
     let observer_running = robot_lock.observer_running.clone();
 
     thread::spawn(move || {
-        thread::sleep(Duration::from_secs(params.timeout));
+        // 将长时间睡眠改为循环短睡眠并检查退出标志
+        let mut remaining = params.timeout as f32;
+        while remaining > 0.0 && observer_running.load(Ordering::Relaxed) {
+            thread::sleep(Duration::from_millis(200));
+            remaining -= 0.2;
+        }
+
+        // 只有超时且未被取消时才执行后续操作
+        // if remaining == 0 {
         let app = app.app_handle().clone();
         let state = app.state::<AppState>();
 
@@ -258,6 +266,7 @@ pub fn start_assistant<R: tauri::Runtime>(
         observer_running.store(false, Ordering::Relaxed);
         let _ = state.set_shared_state(shared_state);
         let _ = state.push_shared_state();
+        // }
     });
 
     Response::success("Assistant started successfully".to_string())
@@ -281,11 +290,11 @@ pub fn stop_assistant(state: tauri::State<AppState>) -> Response<String> {
     robot_lock.observer_running.store(false, Ordering::Relaxed);
 
     /*************************** 读取并更新shared_state *************************** */
-    let mut shared_state = state.shared_state.clone().read().unwrap().clone();
-    shared_state.observering = false;
+    // let mut shared_state = state.shared_state.clone().read().unwrap().clone();
+    // shared_state.observering = false;
 
-    state.set_shared_state(shared_state).unwrap();
-    state.push_shared_state().unwrap();
+    // state.set_shared_state(shared_state).unwrap();
+    // state.push_shared_state().unwrap();
 
     Response::success("Assistant stopped successfully".to_string())
 }

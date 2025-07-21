@@ -150,6 +150,7 @@ export function SelectJointDirField() {
     const { disabled } = useDisabled()
     const observe_type = useSelector((state: RootState) => state.assistants.filter_field.observe_type);
     const mode = useSelector((state: RootState) => state.assistants.filter_field.mode);
+    const axis = useSelector((state: RootState) => state.app.shared_state.axis);
     // 关节或者坐标
     const opts: DefaultOptionType[] = useMemo<
         DefaultOptionType[]
@@ -164,16 +165,11 @@ export function SelectJointDirField() {
                 ...options,
             ];
         } else {
-            options = [{ value: OPTION_EMPTY, label: t("allJoints") }, ...options];
-            // @ts-ignore
-            options = options.splice(
-                0,
-                ARM_MODEL_JOINT["lite6"] + 1 // wsState.xArmInfo.xarm_type.toLowerCase()
-            );
+            options = [{ value: OPTION_EMPTY, label: t("allJoints") }, ...options].slice(0, axis + 1);
         }
 
         return options as DefaultOptionType[];
-    }, [i18n.language, observe_type, mode]);
+    }, [i18n.language, observe_type, mode, axis]);
 
 
     return (
@@ -222,7 +218,7 @@ export function SelectUnitField() {
     const opts: DefaultOptionType[] = useMemo<DefaultOptionType[]>(() => {
         return [
             { value: "radian", label: t("radian") },
-            { value: "degree", label: t("angle") },
+            { value: "angle", label: t("angle") },
         ];
     }, [i18n.language]);
 

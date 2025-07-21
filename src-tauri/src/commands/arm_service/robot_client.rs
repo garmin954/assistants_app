@@ -2,9 +2,10 @@ use crate::commands::arm_service::connection::RobotConnection;
 use crate::commands::arm_service::parser::Parser;
 use crate::commands::arm_service::robot_data::RobotDataPacket;
 use crate::commands::arm_service::structs::{
-    ChartData, Hertz, Mode, ObserveParams, ObserveType, ResponseChartData,
+    ChartData, Hertz, Mode, ObserveParams, ObserveType, ResponseChartData, Unit, SHOW_RAD_TYPE,
 };
 use chrono::{DateTime, Local};
+use std::f32::consts::PI;
 use std::io::{self, Result};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, RwLock};
@@ -219,7 +220,7 @@ pub fn process_chart_data(
 
     let mut data: Vec<ChartData> = vec![];
     for ot in choose_ot {
-        let value: Vec<f32> = match ot {
+        let mut value: Vec<f32> = match ot {
             ObserveType::TargetJointPositions => packet.target_joint_positions.clone().to_vec(),
             ObserveType::TargetJointVelocities => packet.target_joint_velocities.clone().to_vec(),
             ObserveType::TargetJointAccelerations => {
@@ -303,6 +304,11 @@ pub fn process_chart_data(
                     "无法读取观测参数",
                 ));
             }
+        };
+
+        // value 根据op.unit 转成弧度或者角度
+        if op.unit == Unit::Angle && SHOW_RAD_TYPE.contains(&ot) {
+            value = value.iter().map(|v| v / PI * 180.0).collect();
         };
 
         let chart_data = ChartData {

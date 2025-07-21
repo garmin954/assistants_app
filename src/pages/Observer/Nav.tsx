@@ -54,7 +54,7 @@ export default function Nav() {
     return Languages.find((item) => item.code === i18n.language);
   }, [i18n.language]);
 
-  const [ipAddress, setIpAddress] = useState("192.168.1.57");
+  const [ipAddress, setIpAddress] = useState("192.168.1.");
   const [isValidIp, setIsValidIp] = useState(true);
 
   const validateIp = (ip: string) => {
