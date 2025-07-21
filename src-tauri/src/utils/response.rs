@@ -25,6 +25,7 @@ impl<T> Response<T> {
     }
 
     // 添加自定义状态码的方法
+    #[allow(dead_code)]
     pub fn new(code: i32, data: Option<T>, msg: impl Into<String>) -> Self {
         Self {
             code,
@@ -34,7 +35,7 @@ impl<T> Response<T> {
     }
 }
 
-use std::fmt::{Debug, Display};
+use std::fmt::Display;
 
 impl<T, E: Display> From<Result<T, E>> for Response<T> {
     fn from(result: Result<T, E>) -> Self {

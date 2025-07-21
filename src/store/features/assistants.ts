@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { save } from "@tauri-apps/plugin-dialog";
-import { downloadDir, join, basename, dirname } from '@tauri-apps/api/path';
+import { downloadDir, join, } from '@tauri-apps/api/path';
 import dayjs from "dayjs";
 
 
@@ -81,7 +81,7 @@ export const switchObserveState = createAsyncThunk<Response<unknown>>('assistant
                 hz: filter_field.hz,
                 unit: filter_field.unit,
                 timeout: filter_field.timeout,
-                csv: false,
+                csv: filter_field.csv,
             }
 
             console.log('params==>', params);

@@ -19,6 +19,11 @@ pub struct RobotClient {
     is_running: Arc<AtomicBool>,
 }
 
+#[derive(Debug)]
+pub struct ResponseData {
+    pub data: ResponseChartData,
+    pub csv: bool,
+}
 impl RobotClient {
     /// 初始化机器人客户端
     pub fn new(ip_addr: String) -> Result<Self> {
@@ -43,7 +48,7 @@ impl RobotClient {
         mut handler: F,
     ) -> Result<()>
     where
-        F: FnMut(Result<ResponseChartData>) -> Result<()>,
+        F: FnMut(Result<ResponseData>) -> Result<()>,
     {
         // 检查连接是否存在
         let connection = self
@@ -155,7 +160,7 @@ pub fn process_chart_data(
     // app_handle: &tauri::AppHandle,
     observe_params: Arc<RwLock<ObserveParams>>,
     packet: &RobotDataPacket,
-) -> Result<ResponseChartData> {
+) -> Result<ResponseData> {
     let op = match observe_params.read() {
         Ok(op) => op,
         Err(_) => {
@@ -318,5 +323,8 @@ pub fn process_chart_data(
     };
 
     // println!("{:?}", packet);
-    Ok(s)
+    Ok(ResponseData {
+        data: s,
+        csv: op.csv.clone(),
+    })
 }

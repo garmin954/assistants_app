@@ -13,7 +13,6 @@ use std::{
     time::Duration,
 };
 
-use anyhow::Context;
 use robot_client::RobotClient;
 use serde_json::Value;
 use tauri::{Emitter, Manager};
@@ -92,9 +91,14 @@ pub async fn connect_robot_server<R: tauri::Runtime>(
                 client.collect_data(stop_flag, observer_running, observe_params, |rp| {
                     // 发送事件
                     if let Ok(packet) = rp {
-                        let _ = ah.emit("ROBOT_TCP_DATA", &packet);
-                        if let Some(csv_exporter) = csv_exporter.write().unwrap().as_mut() {
-                            csv_exporter.write_packet(&packet)?;
+                        let _ = ah.emit("ROBOT_TCP_DATA", &packet.data);
+                        // 写入csv文件
+                        if packet.csv {
+                            if let Some(csv_exporter) = csv_exporter.write().unwrap().as_mut() {
+                                if let Err(e) = csv_exporter.write_packet(&packet.data) {
+                                    eprintln!("Failed to write packet to CSV: {:?}", e);
+                                }
+                            }
                         }
                     } else {
                         eprintln!("Failed to collect data:{:?}", rp.unwrap_err());
@@ -165,6 +169,7 @@ pub async fn disconnect_robot_server(
 
             robot_lock.socket = None;
             robot_lock.connected = false;
+            robot_lock.observer_running.store(false, Ordering::Relaxed);
 
             /*************************** 读取并更新shared_state *************************** */
             let shared_state = SharedState::default();
@@ -180,7 +185,7 @@ pub async fn disconnect_robot_server(
             // 清空临时文件
             if let Some(csv_exporter) = csv_exporter_rw.as_mut() {
                 csv_exporter
-                    .clear_temp_file()
+                    .delete()
                     .map_err(|e| format!("Failed to clear temp file: {:?}", e))?;
                 *csv_exporter_rw = None;
             }
@@ -216,8 +221,8 @@ pub fn start_assistant<R: tauri::Runtime>(
     let mut csv_exporter_rw = robot_lock.csv_exporter.write().unwrap();
     // 清空临时文件
     if let Some(csv_exporter) = csv_exporter_rw.as_mut() {
-        if let Err(e) = csv_exporter.clear_temp_file() {
-            return Response::error(format!("Failed to clear temp file: {:?}", e));
+        if let Err(e) = csv_exporter.create() {
+            return Response::error(format!("Failed to create temp file: {:?}", e));
         }
     }
 
@@ -281,14 +286,6 @@ pub fn stop_assistant(state: tauri::State<AppState>) -> Response<String> {
 
     state.set_shared_state(shared_state).unwrap();
     state.push_shared_state().unwrap();
-
-    let csv_exporter = robot_lock.csv_exporter.clone();
-    // 保存csv
-    if let Some(csv_exporter) = csv_exporter.write().unwrap().as_mut() {
-        csv_exporter
-            .save_to(&PathBuf::from("robot_data.csv"))
-            .unwrap();
-    }
 
     Response::success("Assistant stopped successfully".to_string())
 }

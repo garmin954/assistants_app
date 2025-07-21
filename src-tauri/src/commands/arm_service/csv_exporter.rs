@@ -16,19 +16,45 @@ pub struct CsvExporter {
 
 impl CsvExporter {
     pub fn new() -> io::Result<Self> {
-        let timestamp = Local::now().format("%Y%m%d_%H%M%S");
+        let timestamp: chrono::format::DelayedFormat<chrono::format::StrftimeItems<'_>> =
+            Local::now().format("%Y%m%d_%H%M%S");
         let temp_dir = std::env::temp_dir();
         let temp_path = temp_dir.join(format!("robot_data_{}.csv", timestamp));
         let writer = Writer::from_path(temp_path.clone())?;
+
         Ok(Self { writer, temp_path })
+    }
+
+    // 创建临时文件
+    pub fn create(&mut self) -> io::Result<()> {
+        self.delete()?;
+
+        let timestamp: chrono::format::DelayedFormat<chrono::format::StrftimeItems<'_>> =
+            Local::now().format("%Y%m%d_%H%M%S");
+        let temp_dir = std::env::temp_dir();
+        let temp_path = temp_dir.join(format!("robot_data_{}.csv", timestamp));
+        let writer = Writer::from_path(temp_path.clone())?;
+        self.temp_path = temp_path;
+        self.writer = writer;
+
+        Ok(())
+    }
+
+    // 删除临时文件
+    #[allow(dead_code)]
+    pub fn delete(&mut self) -> io::Result<()> {
+        std::fs::remove_file(&self.temp_path)?;
+        Ok(())
     }
 
     /// 写入数据
     pub fn write_packet(&mut self, packet: &ResponseChartData) -> io::Result<()> {
+        self.writer.flush()?;
+
         let mut record: Vec<String> = vec![];
 
         // 写入时间戳 当前时间
-        record.push(Local::now().timestamp_micros().to_string());
+        record.push(Local::now().timestamp_millis().to_string());
 
         // 写入数据
         for cd in &packet.data {
@@ -41,6 +67,7 @@ impl CsvExporter {
         self.writer.write_record(&record)?;
         self.writer.flush()?;
 
+        // 强制换行
         Ok(())
     }
 

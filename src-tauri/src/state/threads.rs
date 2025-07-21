@@ -1,12 +1,4 @@
-use std::sync::Arc;
-
-use anyhow::{anyhow, Ok};
-use tauri::{AppHandle, Manager};
-
-use crate::{
-    commands::arm_service::ws_get::ws_get_data,
-    state::app_state::{get_app_handle, AppState, SharedState},
-};
+use tauri::AppHandle;
 
 pub fn get_state_data(_rx: &AppHandle) {
     // let app_handle = rx.clone();

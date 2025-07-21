@@ -17,6 +17,10 @@ export default function Download() {
         (state) => state.app.shared_state.observering
     )
 
+    const arm_conn = useSelector<RootState, boolean>(
+        (state) => state.app.shared_state.arm_conn
+    )
+
     const { disabled } = useDisabled()
 
     const { csv, observer } = useSelector<RootState, { csv: boolean, observer: boolean }>(
@@ -34,7 +38,10 @@ export default function Download() {
         } else {
             setShowDownload(csv)
         }
-    }, [observering])
+        if (!arm_conn) {
+            setShowDownload(false)
+        }
+    }, [observering, arm_conn])
 
     // 下载观测数据文件
     const { run: downloadFile, loading: downloadLoading } = useRequest(
