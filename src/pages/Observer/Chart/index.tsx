@@ -187,7 +187,11 @@ export default () => {
   useAsyncEffect(async () => {
     await sleep(100);
     renderChart(observeType)
-  }, [observeType, jointDir, compare, armConn, i18n.language])
+  }, [observeType, jointDir, compare, armConn, i18n.language, jointDirOpts])
+  useAsyncEffect(async () => {
+    await sleep(300);
+    renderChart(observeType)
+  }, [jointDirOpts])
 
   const LoadingTmp = <Spin spinning={true} size="large" className="mt-[20%]" />;
 

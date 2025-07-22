@@ -17,7 +17,6 @@ import {
 import { useRequest } from "ahooks";
 import { useDispatch, useSelector } from "react-redux";
 import { RootDispatch, RootState } from "@/store";
-import { AssistantsState } from "@/store/features/assistants";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { toast } from "sonner";
 

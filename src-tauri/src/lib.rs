@@ -1,5 +1,4 @@
 use chrono::{Local, Utc};
-use state::threads::get_state_data;
 use std::{env, sync::Arc};
 use tauri::Manager;
 use tauri_plugin_log::{Target, TargetKind};
@@ -84,7 +83,6 @@ pub fn run() {
             // let app_state_arc = Arc::new(app_state);
             app.manage(app_state);
             desktops::window::setup_desktop_window(handle)?;
-            get_state_data(handle);
 
             Ok(())
         })
