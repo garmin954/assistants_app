@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootDispatch, RootState } from "@/store";
 import { AssistantsState } from "@/store/features/assistants";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { toast } from "sonner";
 
 const Languages = [
   {
@@ -36,8 +37,8 @@ export default function Nav() {
   const { t, i18n } = useTranslation();
 
   const dispatch = useDispatch<RootDispatch>();
-  const state = useSelector<RootState, AssistantsState>(
-    (state) => state.assistants
+  const serverState = useSelector<RootState, boolean>(
+    (state) => state.assistants.server_state
   );
 
   useEffect(() => {
@@ -55,7 +56,7 @@ export default function Nav() {
   }, [i18n.language]);
 
   const [ipAddress, setIpAddress] = useState("192.168.1.");
-  const [isValidIp, setIsValidIp] = useState(true);
+  const [isValidIp, setIsValidIp] = useState(false);
 
   const validateIp = (ip: string) => {
     const ipRegex =
@@ -95,8 +96,12 @@ export default function Nav() {
       }
     );
 
+  // 连接/断开服务器
   function onHandelConnectServer() {
-    if (state.server_state) {
+    if (!validateIp(ipAddress)) {
+      return toast.error(t("address_ip_error"));
+    }
+    if (serverState) {
       onDisconnectPortServer();
     } else {
       onConnectPortServer();
@@ -112,7 +117,7 @@ export default function Nav() {
             }`}
           value={ipAddress}
           onChange={handleIpChange}
-          readOnly={state.server_state}
+          readOnly={serverState}
           type="ip"
         />
         <Button
@@ -120,7 +125,7 @@ export default function Nav() {
           onClick={onHandelConnectServer}
           loading={connectLoading || disconnectLoading}
         >
-          {state.server_state ? t("disconnect") : t("connect")}
+          {serverState ? t("disconnect") : t("connect")}
         </Button>
       </div>
 

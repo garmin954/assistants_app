@@ -29,13 +29,14 @@
     "operation_failed": "Operation failed",
     "connect_failed": "Connect failed",
     "download_fail": "Download failed",
+    "address_ip_error": "IP address error",
     "jointVelocityItems": [
         {
-            "value": "analysis_joint_positions",
+            "value": "target_joint_positions",
             "label": "Target Joint Positions"
         },
         {
-            "value": "analysis_joint_velocities",
+            "value": "target_joint_velocities",
             "label": "Target Joint Velocities"
         },
         {

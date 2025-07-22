@@ -29,6 +29,7 @@
     "operation_failed": "操作失败",
     "connect_failed": "连接失败",
     "download_fail": "下载失败",
+    "address_ip_error": "IP地址错误",
     "jointVelocityItems": [
         {
             "value": "target_joint_positions",

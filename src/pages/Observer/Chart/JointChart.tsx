@@ -178,7 +178,6 @@ export default React.forwardRef<RefType, Props>((props, ref) => {
     ).forEach((v) => {
       data[v.value as JointValueKey] = v.label;
     });
-
     return data;
   }, [i18n.language]);
 

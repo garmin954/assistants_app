@@ -230,7 +230,7 @@ export function getObserveTypes(observeType: JointValueKey): JointValueKey[] {
         case "analysis_tcp_positions":
             return [
                 "actual_tcp_pose",
-                "actual_tcp_pose"
+                "target_tcp_pose"
             ]
             break;
         case "analysis_tcp_velocities":

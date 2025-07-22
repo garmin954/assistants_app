@@ -1,7 +1,5 @@
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 
-use crate::{commands::system::SERVER_NAME, utils::process_manage::kill_process};
-
 pub fn setup_desktop_window(app: &AppHandle) -> tauri::Result<()> {
     // 主窗口配置
     let main_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::App("/app".into()))
@@ -37,8 +35,6 @@ pub fn setup_desktop_window(app: &AppHandle) -> tauri::Result<()> {
             WindowEvent::CloseRequested { api, .. } => {
                 println!("关闭请求，窗口将最小化而不是关闭。");
                 println!("ap,{:?}i", api);
-
-                let _ = kill_process(SERVER_NAME);
                 std::process::exit(0);
             }
             _ => {}

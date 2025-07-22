@@ -7,7 +7,7 @@ import { SELECTED_FIELD, setSelectedField } from "@/store/features/assistants";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
-import { ARM_JOINT_TYPE_UNIT, ARM_MODEL_JOINT, DefaultOptionType, optionsCorrespondingToParameters, SHOW_RAD_TYPE } from "../options";
+import { ARM_JOINT_TYPE_UNIT, DefaultOptionType, optionsCorrespondingToParameters, SHOW_RAD_TYPE } from "../options";
 import { OPTION_EMPTY } from "@/lib/constant";
 
 

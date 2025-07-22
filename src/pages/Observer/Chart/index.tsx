@@ -22,6 +22,7 @@ import {
   SHOW_RAD_TYPE,
 } from "../options";
 import { useAsyncEffect } from "ahooks";
+import { useTranslation } from "react-i18next";
 
 const JointChart = React.lazy(() => import("./JointChart"));
 const MAX_LENGTH = 6000;
@@ -38,6 +39,10 @@ const UPDATE_INTERVAL = 100; // 100ms更新一次
 
 export default () => {
   console.log("Chart------------------");
+  const { i18n } = useTranslation();
+  const mode = useSelector<RootState, string>(
+    (state) => state.assistants.filter_field.mode
+  );
   const unit = useSelector<RootState, string>(
     (state) => state.assistants.filter_field.unit
   );
@@ -53,20 +58,31 @@ export default () => {
   const axis = useSelector<RootState, number>(
     (state) => state.app.shared_state.axis
   );
+  const armConn = useSelector<RootState, boolean>(
+    (state) => state.app.shared_state.arm_conn
+  );
+  const serverState = useSelector<RootState, boolean>(
+    (state) => state.assistants.server_state
 
+  );
   const observering = useSelector<RootState, boolean>(
     (state) => state.app.shared_state.observering
   );
+
   const lastUpdateRef = useRef(0);
   const echartsRef = useRef<Record<string, any>>({});
   const chartDataRef = useRef<ObserveChartDate>(deepClone(DEFAULT_DATA));
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (observering) {
+    if (observering || !armConn) {
       chartDataRef.current = deepClone(DEFAULT_DATA);
     }
-  }, [observering])
+  }, [observering, armConn, mode])
+
+  useEffect(() => {
+    chartDataRef.current = deepClone(DEFAULT_DATA);
+  }, [mode])
 
 
   // 获取显示的关节方向
@@ -74,11 +90,14 @@ export default () => {
     const opts = optionsCorrespondingToParameters(
       observeType as keyof typeof ARM_JOINT_TYPE_UNIT
     );
+    if (!serverState) {
+      return opts.slice(0, 6);
+    }
     if (jointDir !== OPTION_EMPTY) {
       return opts.filter((v) => v.value === jointDir);
     }
     return opts.slice(0, axis > 6 ? 6 : axis);
-  }, [jointDir, axis])
+  }, [jointDir, axis, serverState])
 
 
   // 获取某关节某类型数据
@@ -168,7 +187,7 @@ export default () => {
   useAsyncEffect(async () => {
     await sleep(100);
     renderChart(observeType)
-  }, [observeType, jointDir, compare])
+  }, [observeType, jointDir, compare, armConn, i18n.language])
 
   const LoadingTmp = <Spin spinning={true} size="large" className="mt-[20%]" />;
 
