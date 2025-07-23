@@ -1,12 +1,11 @@
 use anyhow::anyhow;
+use futures::SinkExt;
+use futures::StreamExt;
 use serde::Serialize;
 use std::error::Error;
 use tokio::time::timeout;
 use tokio_tungstenite::connect_async;
 use url::Url;
-// 添加缺失的 trait 导入
-use futures_util::stream::StreamExt;
-use futures_util::SinkExt; // 关键：导入 StreamExt trait
 
 #[derive(Serialize, Debug)]
 pub struct WSSdkData {
