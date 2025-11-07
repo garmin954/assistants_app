@@ -72,12 +72,20 @@
             "label": "Target TCP Speed"
         },
         {
+            "value": "target_tcp_accelerations",
+            "label": "Target TCP Accelerations"
+        },
+        {
             "value": "actual_tcp_pose",
             "label": "Actual TCP Pose"
         },
         {
             "value": "actual_tcp_velocity",
             "label": "Actual TCP Speed"
+        },
+        {
+            "value": "actual_tcp_accelerations",
+            "label": "Actual TCP Accelerations"
         },
         {
             "value": "estimated_tcp_torque",
@@ -112,6 +120,10 @@
         {
             "value": "analysis_tcp_velocities",
             "label": "TCP Speed"
+        },
+        {
+            "value": "analysis_tcp_accelerations",
+            "label": "TCP Accelerations"
         }
     ]
 }

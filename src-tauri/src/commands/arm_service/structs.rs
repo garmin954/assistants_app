@@ -24,6 +24,8 @@ pub enum ObserveType {
     ActualTcpVelocity,          // 实际TCP速度，mm/s，6个坐标
     EstimatedTcpTorque,         // 估计TCP力矩，N*m，6个坐标
     EstimatedJointTorque,       // 估计关节力矩，N*m，7个关节
+    TargetTcpAccelerations,     // 规划TCP加速度，mm/s^2，6个坐标
+    ActualTcpAccelerations,     // 实际TCP加速度，mm/s^2，6个坐标
     DataTorqueSensor,           // 力矩传感器原始6D力/力矩，N*m，6个坐标
     FilteredDataTorqueSensor,   // 力矩传感器滤波6D力/力矩，N*m，6个坐标
     AnalysisJointPositions,     // 分析关节位置
@@ -31,6 +33,7 @@ pub enum ObserveType {
     AnalysisJointAccelerations, // 分析关节加速度
     AnalysisTcpPositions,       // 分析TCP位置
     AnalysisTcpVelocities,      // 分析TCP速度
+    AnalysisTcpAccelerations,   // 分析TCP加速度
     DifferenceData,             // 差值数据
 }
 // impl PartialEq for ObserveType {
@@ -46,15 +49,18 @@ pub const SHOW_RAD_TYPE: &[ObserveType] = &[
     ObserveType::ActualJointPositions,
     ObserveType::ActualJointVelocities,
     ObserveType::ActualJointAccelerations,
-    ObserveType::TargetTcpPose,
-    ObserveType::TargetTcpVelocity,
-    ObserveType::ActualTcpPose,
-    ObserveType::ActualTcpVelocity,
+    // ObserveType::TargetTcpPose,
+    // ObserveType::TargetTcpVelocity,
+    // ObserveType::ActualTcpPose,
+    // ObserveType::ActualTcpVelocity,
     ObserveType::AnalysisJointPositions,
     ObserveType::AnalysisJointVelocities,
     ObserveType::AnalysisJointAccelerations,
-    ObserveType::AnalysisTcpPositions,
-    ObserveType::AnalysisTcpVelocities,
+    // ObserveType::AnalysisTcpPositions,
+    // ObserveType::AnalysisTcpVelocities,
+    // ObserveType::TargetTcpAccelerations,
+    // ObserveType::ActualTcpAccelerations,
+    // ObserveType::AnalysisTcpAccelerations,
 ];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

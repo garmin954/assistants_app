@@ -38,7 +38,6 @@ const DEFAULT_DATA = {
 const UPDATE_INTERVAL = 100; // 100ms更新一次
 
 export default () => {
-  console.log("Chart------------------");
   const { i18n } = useTranslation();
   const mode = useSelector<RootState, string>(
     (state) => state.assistants.filter_field.mode

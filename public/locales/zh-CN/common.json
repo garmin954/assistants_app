@@ -72,12 +72,20 @@
             "label": "规划TCP速度"
         },
         {
+            "value": "target_tcp_accelerations",
+            "label": "规划TCP加速度"
+        },
+        {
             "value": "actual_tcp_pose",
             "label": "实际TCP位置"
         },
         {
             "value": "actual_tcp_velocity",
             "label": "实际TCP速度"
+        },
+        {
+            "value": "actual_tcp_accelerations",
+            "label": "实际TCP加速度"
         },
         {
             "value": "estimated_tcp_torque",
@@ -112,6 +120,10 @@
         {
             "value": "analysis_tcp_velocities",
             "label": "TCP速度"
+        },
+        {
+            "value": "analysis_tcp_accelerations",
+            "label": "TCP加速度"
         }
     ]
 }

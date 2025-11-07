@@ -35,6 +35,7 @@ const ANALYSIS_JOINT_FIELDS = [
 const ANALYSIS_TCP_POSITION_FIELDS = [
     "analysis_tcp_positions",
     "analysis_tcp_velocities",
+    "analysis_tcp_accelerations",
 ]
 
 // TCP的字段
@@ -43,6 +44,8 @@ const TCP_POSITION_FIELD = [
     'target_tcp_velocity',
     'actual_tcp_pose',
     'actual_tcp_velocity',
+    'target_tcp_accelerations',
+    'actual_tcp_accelerations',
 ]
 // 力矩的字段
 const MOMENT_POSITION_FIELD = [
@@ -63,6 +66,8 @@ export const ARM_JOINT_TYPE_UNIT = {
     'analysis_tcp_positions': gur(['mm', 3], ['rad', 3]),
     // 分析的TCP速度 和规划的TCP速度
     'analysis_tcp_velocities': gur(['mm/s', 3], ['rad/s', 3]),
+    // 分析的TCP加速度 和规划的TCP加速度
+    'analysis_tcp_accelerations': gur(['mm/s²', 3]),
     // 规划关节位置
     'target_joint_positions': gur(['rad', 8]),
     // 规划关节速度
@@ -89,6 +94,10 @@ export const ARM_JOINT_TYPE_UNIT = {
     'actual_tcp_velocity': gur(['mm/s', 3], ['rad/s', 3]),
     // 电流估算的TCP力矩
     'estimated_tcp_torque': gur(['N', 3], ['N·m', 3]),
+    // 规划TCP加速度
+    'target_tcp_accelerations': gur(['mm/s²', 3]),
+    // 实际TCP加速度
+    'actual_tcp_accelerations': gur(['mm/s²', 3]),
     // 力矩传感器(原始值)
     'data_torque_sensor': gur(['N', 3], ['N·m', 3]),
     // 力矩传感器(滤波值)
@@ -138,15 +147,18 @@ export const SHOW_RAD_TYPE = [
     'actual_joint_positions',
     'actual_joint_velocities',
     'actual_joint_accelerations',
-    'target_tcp_pose',
-    'target_tcp_velocity',
-    'actual_tcp_pose',
-    'actual_tcp_velocity',
+    // 'target_tcp_pose',
+    // 'target_tcp_velocity',
+    // 'actual_tcp_pose',
+    // 'actual_tcp_velocity',
+    // 'target_tcp_accelerations',
+    // 'actual_tcp_accelerations',
     'analysis_joint_positions',
     'analysis_joint_velocities',
     'analysis_joint_accelerations',
-    'analysis_tcp_positions',
-    'analysis_tcp_velocities'
+    // 'analysis_tcp_positions',
+    // 'analysis_tcp_velocities',
+    // 'analysis_tcp_accelerations',
 ]
 // 关节的字段
 export const optionsCorrespondingToParameters = (paramsType: keyof typeof ARM_JOINT_TYPE_UNIT): DefaultOptionType[] => {
@@ -237,6 +249,12 @@ export function getObserveTypes(observeType: JointValueKey): JointValueKey[] {
             return [
                 "target_tcp_velocity",
                 "actual_tcp_velocity"
+            ]
+            break;
+        case "analysis_tcp_accelerations":
+            return [
+                "target_tcp_accelerations",
+                "actual_tcp_accelerations"
             ]
             break;
         default:

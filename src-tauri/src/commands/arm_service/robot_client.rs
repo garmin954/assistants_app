@@ -206,6 +206,12 @@ pub fn process_chart_data(
                         ObserveType::TargetTcpVelocity,
                     ]
                 }
+                ObserveType::AnalysisTcpAccelerations => {
+                    vec![
+                        ObserveType::ActualTcpAccelerations,
+                        ObserveType::TargetTcpAccelerations,
+                    ]
+                }
                 _ => {
                     return Err(io::Error::new(
                         io::ErrorKind::InvalidData,
@@ -240,6 +246,8 @@ pub fn process_chart_data(
             ObserveType::ActualTcpVelocity => packet.actual_tcp_velocity.clone().to_vec(),
 
             ObserveType::EstimatedTcpTorque => packet.estimated_tcp_torque.clone().to_vec(),
+            ObserveType::TargetTcpAccelerations => packet.target_tcp_accelerations.clone().to_vec(),
+            ObserveType::ActualTcpAccelerations => packet.actual_tcp_accelerations.clone().to_vec(),
             ObserveType::EstimatedJointTorque => packet.estimated_joint_torque.clone().to_vec(),
             ObserveType::DataTorqueSensor => packet.data_torque_sensor.clone().to_vec(),
             ObserveType::FilteredDataTorqueSensor => {
@@ -285,6 +293,15 @@ pub fn process_chart_data(
                 ObserveType::AnalysisTcpVelocities => {
                     let a = packet.actual_tcp_velocity.clone().to_vec();
                     let t = packet.target_tcp_velocity.clone().to_vec();
+                    let mut diff = vec![];
+                    for (i, j) in a.iter().zip(t.iter()) {
+                        diff.push(*i - *j);
+                    }
+                    diff
+                }
+                ObserveType::AnalysisTcpAccelerations => {
+                    let a = packet.actual_tcp_accelerations.clone().to_vec();
+                    let t = packet.target_tcp_accelerations.clone().to_vec();
                     let mut diff = vec![];
                     for (i, j) in a.iter().zip(t.iter()) {
                         diff.push(*i - *j);

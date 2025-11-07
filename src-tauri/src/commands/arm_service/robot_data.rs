@@ -61,8 +61,14 @@ pub struct RobotDataPacket {
     /// 估算TCP扭矩（ByteOffset: 521, ByteLength: 24, Type: FP32[6]）N & N·m
     pub estimated_tcp_torque: [f32; 6],
 
+    // 规划TCP加速度
+    pub target_tcp_accelerations: [f32; 6],
+
+    /// 实际TCP加速度
+    pub actual_tcp_accelerations: [f32; 6],
+
     /// 预留（用于TCP信息）（ByteOffset: 545, ByteLength: 144, Type: FP32[36]）
-    pub reserved_tcp: [f32; 36],
+    pub reserved_tcp: [f32; 24],
 
     /// 六维力矩传感器原始数据（ByteOffset: 689, ByteLength: 24, Type: FP32[6]）
     pub data_torque_sensor: [f32; 6],
@@ -78,6 +84,7 @@ impl RobotDataPacket {
     /// 从 785 字节数据中解析结构体
     pub fn from_bytes(data: &[u8]) -> std::io::Result<Self> {
         let mut cursor = Cursor::new(data);
+        // println!("data: {:?}", data);
 
         let byte_count = cursor.read_u32::<LittleEndian>()?;
         let timestamp = cursor.read_i64::<LittleEndian>()?;
@@ -103,8 +110,13 @@ impl RobotDataPacket {
         let actual_tcp_pose = Self::read_f32_array::<6>(&mut cursor)?;
         let actual_tcp_velocity = Self::read_f32_array::<6>(&mut cursor)?;
         let estimated_tcp_torque = Self::read_f32_array::<6>(&mut cursor)?;
+        let target_tcp_accelerations = Self::read_f32_array::<6>(&mut cursor)?;
+        let actual_tcp_accelerations = Self::read_f32_array::<6>(&mut cursor)?;
+        // println!("estimated_tcp_torque: {:?}", estimated_tcp_torque);
+        // println!("target_tcp_accelerations: {:?}", target_tcp_accelerations);
+        // println!("actual_tcp_accelerations: {:?}", actual_tcp_accelerations);
 
-        let reserved_tcp = Self::read_f32_array::<36>(&mut cursor)?;
+        let reserved_tcp = Self::read_f32_array::<24>(&mut cursor)?;
         let data_torque_sensor = Self::read_f32_array::<6>(&mut cursor)?;
         let filtered_data_torque_sensor = Self::read_f32_array::<6>(&mut cursor)?;
         let reserved_external = Self::read_f32_array::<12>(&mut cursor)?;
@@ -129,6 +141,8 @@ impl RobotDataPacket {
             actual_tcp_pose,
             actual_tcp_velocity,
             estimated_tcp_torque,
+            target_tcp_accelerations,
+            actual_tcp_accelerations,
             reserved_tcp,
             data_torque_sensor,
             filtered_data_torque_sensor,
