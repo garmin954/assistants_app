@@ -1,6 +1,6 @@
 [package]
 name = "UFACTORY调参工具"
-version = "1.0.10"
+version = "1.0.11"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
@@ -27,6 +27,7 @@ reqwest = { version = "0.11", features = ["json", "stream"] }
 futures = "0.3"
 zip = "0.6"
 chrono = { version = "0.4", features = ["serde"] }
+chrono-tz = "0.8"
 byteorder = "1.4.3"
 csv = "1.1.6"
 bytes = "1"
@@ -37,6 +38,7 @@ tungstenite = "0.27.0"
 tokio-tungstenite = "0.20.0"                     # WebSocket 客户端
 url = "2.0"                                      # URL 解析
 once_cell = "1.18"
+
 
 tauri-plugin-os = "2"
 tauri-plugin-process = "2"
