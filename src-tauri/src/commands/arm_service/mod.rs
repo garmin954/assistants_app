@@ -85,7 +85,9 @@ pub async fn connect_robot_server<R: tauri::Runtime>(
                 .write()
                 .map_err(|e| format!("Failed to acquire csv_exporter lock: {:?}", e))?;
 
-            let exporter = CsvExporter::new()
+            // 使用用户数据目录
+            let csv_temp_dir = state.user_data_paths.csv_temp.clone();
+            let exporter = CsvExporter::new(csv_temp_dir)
                 .map_err(|e| format!("Failed to create CSV exporter: {:?}", e))?;
 
             *csv_exporter = Some(exporter);

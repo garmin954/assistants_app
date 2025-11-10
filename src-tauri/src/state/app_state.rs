@@ -1,4 +1,7 @@
-use crate::commands::arm_service::{csv_exporter::CsvExporter, robot_client::RobotClient, structs};
+use crate::{
+    commands::arm_service::{csv_exporter::CsvExporter, robot_client::RobotClient, structs},
+    utils::user_data::UserDataPaths,
+};
 use anyhow::Result;
 use tauri::{AppHandle, Emitter}; // ← 这个是关键
 
@@ -61,13 +64,16 @@ pub struct AppState {
     pub client: Mutex<Client>,
     pub robot_server: Arc<RwLock<RobotServer>>,
     pub shared_state: Arc<RwLock<SharedState>>,
+    pub user_data_paths: UserDataPaths,
 }
 
 impl AppState {
-    pub fn new(app: AppHandle) -> Self {
-        Self {
+    pub fn new(app: AppHandle) -> Result<Self> {
+        // 初始化用户数据目录
+        let user_data_paths = UserDataPaths::new(&app)?;
+
+        Ok(Self {
             ws_ip: Arc::new(RwLock::new("".to_string())),
-            app: app,
             client: Mutex::new(Client::new()),
             robot_server: Arc::new(RwLock::new(RobotServer {
                 ip: "".to_string(),
@@ -80,8 +86,11 @@ impl AppState {
                 csv_exporter: Arc::new(RwLock::new(None)),
             })),
             shared_state: Arc::new(RwLock::new(SharedState::default())),
-        }
+            user_data_paths,
+            app,
+        })
     }
+
     /// 推送共享状态到前端
     pub fn push_shared_state(&self) -> Result<SharedState> {
         let shared_state = match self.shared_state.try_read() {

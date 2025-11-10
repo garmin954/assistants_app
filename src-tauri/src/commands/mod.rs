@@ -3,6 +3,7 @@ use serde_json::Value;
 use crate::{state::app_state::AppState, utils::response::Response};
 
 pub mod arm_service;
+pub mod debug;
 pub mod request;
 pub mod system;
 pub mod tools;

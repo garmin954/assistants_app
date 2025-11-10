@@ -12,38 +12,50 @@ use std::{
 pub struct CsvExporter {
     writer: Writer<std::fs::File>,
     temp_path: PathBuf,
+    csv_temp_dir: PathBuf, // 用户数据目录中的CSV临时目录
 }
 
 impl CsvExporter {
-    pub fn new() -> io::Result<Self> {
-        let timestamp: chrono::format::DelayedFormat<chrono::format::StrftimeItems<'_>> =
-            Local::now().format("%Y%m%d_%H%M%S");
-        let temp_dir = std::env::temp_dir();
-        let temp_path = temp_dir.join(format!("robot_data_{}.csv", timestamp));
-        let writer = Writer::from_path(temp_path.clone())?;
+    /// 创建新的CSV导出器
+    ///
+    /// # 参数
+    /// * `csv_temp_dir` - CSV临时文件目录 (来自 UserDataPaths.csv_temp)
+    pub fn new(csv_temp_dir: PathBuf) -> io::Result<Self> {
+        // 确保目录存在
+        std::fs::create_dir_all(&csv_temp_dir)?;
 
-        Ok(Self { writer, temp_path })
+        let timestamp = Local::now().format("%Y%m%d_%H%M%S");
+        let temp_path = csv_temp_dir.join(format!("robot_data_{timestamp}.csv"));
+        let writer = Writer::from_path(&temp_path)?;
+
+        Ok(Self {
+            writer,
+            temp_path,
+            csv_temp_dir,
+        })
     }
 
-    // 创建临时文件
+    /// 创建新的临时文件
     pub fn create(&mut self) -> io::Result<()> {
-        self.delete()?;
+        // 先尝试删除旧文件
+        let _ = self.delete();
 
-        let timestamp: chrono::format::DelayedFormat<chrono::format::StrftimeItems<'_>> =
-            Local::now().format("%Y%m%d_%H%M%S");
-        let temp_dir = std::env::temp_dir();
-        let temp_path = temp_dir.join(format!("robot_data_{}.csv", timestamp));
-        let writer = Writer::from_path(temp_path.clone())?;
+        let timestamp = Local::now().format("%Y%m%d_%H%M%S");
+        let temp_path = self.csv_temp_dir.join(format!("robot_data_{timestamp}.csv"));
+        let writer = Writer::from_path(&temp_path)?;
+
         self.temp_path = temp_path;
         self.writer = writer;
 
         Ok(())
     }
 
-    // 删除临时文件
+    /// 删除临时文件
     #[allow(dead_code)]
     pub fn delete(&mut self) -> io::Result<()> {
-        std::fs::remove_file(&self.temp_path)?;
+        if self.temp_path.exists() {
+            std::fs::remove_file(&self.temp_path)?;
+        }
         Ok(())
     }
 

@@ -1,5 +1,5 @@
-use chrono::{Local, Utc};
-use std::{env, sync::Arc};
+use chrono::Local;
+use std::sync::Arc;
 use tauri::Manager;
 use tauri_plugin_log::{Target, TargetKind};
 
@@ -13,35 +13,16 @@ mod utils;
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet() -> String {
-    format!("Hello, ! You've been greeted from Rust!")
+    "Hello, ! You've been greeted from Rust!".to_string()
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let utc_time = Utc::now();
-    // 直接使用 Asia::Shanghai 作为时区结构体
-    let china_time = utc_time.with_timezone(&Local); // 使用时区转换，不需要显式指定类型
-    let log_file_name = china_time.format("%Y_%m_%d").to_string();
-
     tauri::Builder::default()
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
-            let _ = desktops::window::show_window(app);
+            desktops::window::show_window(app);
         }))
-        .plugin(
-            tauri_plugin_log::Builder::new()
-                .targets([
-                    Target::new(TargetKind::Stdout),
-                    Target::new(TargetKind::LogDir { file_name: None }),
-                    Target::new(TargetKind::Webview),
-                    Target::new(TargetKind::Folder {
-                        path: std::path::PathBuf::from("log/rs"), // 或你动态计算的路径
-                        file_name: Some(log_file_name),           // 如果必须动态，仍得放进 `.setup`
-                    }),
-                ])
-                .timezone_strategy(tauri_plugin_log::TimezoneStrategy::UseLocal)
-                .build(),
-        )
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_store::Builder::new().build())
@@ -60,6 +41,7 @@ pub fn run() {
             commands::arm_service::get_robot_axis,
             commands::arm_service::save_csv,
             commands::get_shared_state,
+            commands::debug::get_user_data_paths,
             greet
         ])
         .setup(|app| {
@@ -69,8 +51,27 @@ pub fn run() {
                 .set(app_arc)
                 .expect("Failed to set global app handle");
 
-            let app_state = state::app_state::AppState::new(handle.clone());
-            // let app_state_arc = Arc::new(app_state);
+            // 初始化 AppState (包含用户数据路径)
+            let app_state = state::app_state::AppState::new(handle.clone())
+                .expect("Failed to initialize app state");
+
+            // 配置日志插件,使用自定义路径
+            let log_file_name = Local::now().format("%Y_%m_%d").to_string();
+            let log_plugin = tauri_plugin_log::Builder::new()
+                .targets([
+                    Target::new(TargetKind::Stdout),
+                    Target::new(TargetKind::Webview),
+                    Target::new(TargetKind::Folder {
+                        path: app_state.user_data_paths.logs.clone(),
+                        file_name: Some(log_file_name),
+                    }),
+                ])
+                .timezone_strategy(tauri_plugin_log::TimezoneStrategy::UseLocal)
+                .build();
+
+            // 注册日志插件
+            handle.plugin(log_plugin)?;
+
             app.manage(app_state);
             desktops::window::setup_desktop_window(handle)?;
 
