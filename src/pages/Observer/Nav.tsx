@@ -14,11 +14,13 @@ import {
   connectPortServer,
   disconnectPortServer,
 } from "@/store/features/assistants";
-import { useRequest } from "ahooks";
+import { useDebounceFn, useRequest } from "ahooks";
 import { useDispatch, useSelector } from "react-redux";
 import { RootDispatch, RootState } from "@/store";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { toast } from "sonner";
+import { listen } from "@tauri-apps/api/event";
+import Modal from "../components/modal/confirm";
 
 const Languages = [
   {
@@ -41,8 +43,32 @@ export default function Nav() {
   );
 
   useEffect(() => {
+
     changeLanguage(i18n.language);
   }, []);
+
+  const { run: disconnect } = useDebounceFn(() => {
+    dispatch(disconnectPortServer());
+    Modal.confirm(t("tips_title"), {
+      width: "380px",
+      content: t("connection_lost"),
+      showCancel: false,
+    });
+  }, {
+    leading: true,
+    wait: 500
+  })
+  // 监听网络连接断开事件
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    listen("ROBOT_CONNECTION_LOST", (payload) => {
+      disconnect()
+    }).then((un) => (unlisten = un));
+
+    return () => {
+      if (unlisten) unlisten();
+    };
+  }, [disconnect]); // 只依赖 disconnect 函数
 
   // 切换语言
   const changeLanguage = (lng: string) => {

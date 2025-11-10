@@ -30,6 +30,8 @@
     "connect_failed": "连接失败",
     "download_fail": "下载失败",
     "address_ip_error": "IP地址错误",
+    "connection_lost": "机械臂通信中断，请检查本地网络是否正常连接机械臂",
+    "tips_title": "提示",
     "jointVelocityItems": [
         {
             "value": "target_joint_positions",

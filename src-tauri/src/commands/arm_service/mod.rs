@@ -120,7 +120,7 @@ pub async fn connect_robot_server<R: tauri::Runtime>(
             let mut client = client_clone
                 .lock()
                 .expect("Failed to lock RobotClient in data collection thread");
-            client.collect_data(stop_flag, observer_running, observe_params, |rp| {
+            let result = client.collect_data(stop_flag, observer_running, observe_params, |rp| {
                 // 发送事件
                 if let Ok(packet) = rp {
                     let _ = ah.emit("ROBOT_TCP_DATA", &packet.data);
@@ -138,7 +138,18 @@ pub async fn connect_robot_server<R: tauri::Runtime>(
                     eprintln!("Failed to collect data: {:?}", e);
                 }
                 Ok(())
-            })
+            });
+
+            // 如果数据采集因错误退出，发送断开连接事件到前端
+            if let Err(ref e) = result {
+                eprintln!("数据采集线程异常退出: {}", e);
+                // 机械臂通信断开，请检查机械臂是否正常连接 英文
+                let _ = ah.emit("ROBOT_CONNECTION_LOST", e.to_string());
+            } else {
+                println!("数据采集线程正常结束");
+            }
+
+            result
         });
 
         // 最后更新 robot_lock 状态

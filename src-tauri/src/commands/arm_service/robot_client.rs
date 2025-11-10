@@ -5,6 +5,7 @@ use crate::commands::arm_service::structs::{
     ChartData, Hertz, Mode, ObserveParams, ObserveType, ResponseChartData, Unit, SHOW_RAD_TYPE,
 };
 use chrono::{DateTime, Local};
+use std::error;
 use std::f32::consts::PI;
 use std::io::{self, Result};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -109,8 +110,6 @@ impl RobotClient {
                 }
                 Err(e) => {
                     if self.is_running.load(Ordering::Relaxed) {
-                        eprintln!("读取数据错误: {}", e);
-                        // 可以选择在这里实现重连逻辑
                         return Err(e);
                     } else {
                         // 正常关闭时忽略错误

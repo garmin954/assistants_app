@@ -30,6 +30,8 @@
     "connect_failed": "Connect failed",
     "download_fail": "Download failed",
     "address_ip_error": "IP address error",
+    "connection_lost": "Robot communication interrupted, please check if the local network is properly connected to the robot",
+    "tips_title": "Tips",
     "jointVelocityItems": [
         {
             "value": "target_joint_positions",
