@@ -17,11 +17,6 @@ use serde::{Deserialize, Serialize};
 
 pub static GLOBAL_APP_HANDLE: OnceCell<std::sync::Arc<AppHandle<tauri::Wry>>> = OnceCell::new();
 
-#[derive(Serialize, Clone, Debug)]
-pub struct StateData {
-    pub server_status: bool,
-}
-
 #[derive(Debug)]
 pub struct RobotServer {
     pub ip: String,

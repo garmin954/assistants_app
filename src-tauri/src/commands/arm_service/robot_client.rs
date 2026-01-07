@@ -5,7 +5,6 @@ use crate::commands::arm_service::structs::{
     ChartData, Hertz, Mode, ObserveParams, ObserveType, ResponseChartData, Unit, SHOW_RAD_TYPE,
 };
 use chrono::{DateTime, Local};
-use std::error;
 use std::f32::consts::PI;
 use std::io::{self, Result};
 use std::sync::atomic::{AtomicBool, Ordering};
