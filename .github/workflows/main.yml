@@ -1,0 +1,192 @@
+name: Assistant Tauri Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. 1.0.0)"
+        required: false
+      notes:
+        description: "Release notes"
+        required: false
+      prerelease:
+        description: "Publish as pre-release"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "9"
+
+jobs:
+  prepare-release:
+    name: Prepare GitHub release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      tag_name: ${{ steps.meta.outputs.tag_name }}
+      release_name: ${{ steps.meta.outputs.release_name }}
+      release_notes: ${{ steps.meta.outputs.release_notes }}
+      latest_notes: ${{ steps.meta.outputs.latest_notes }}
+      prerelease: ${{ steps.meta.outputs.prerelease }}
+      release_id: ${{ steps.create_release.outputs.release_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compute release metadata
+        id: meta
+        shell: bash
+        run: |
+          if [[ -n "${{ github.event.inputs.version }}" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+          elif [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            echo "Release version is required (tag push or workflow input)." >&2
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag_name=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "release_name=UFACTORY Studio v$VERSION" >> "$GITHUB_OUTPUT"
+
+          # Default values
+          RELEASE_NOTES=""
+          LATEST_NOTES="{\"force_update\":false,\"description\":{\"cn\":\"\",\"en\":\"\"},\"content\":{\"cn\":\"\",\"en\":\"\"}}"
+
+          # If release.md exists, use its markdown content as GitHub release body
+          if [[ -f "release.md" ]]; then
+            echo "Using release.md for release notes"
+            RELEASE_NOTES="$(cat release.md)"
+          fi
+
+          # If latest.md exists, build structured JSON string for latest.json.notes via node script
+          if [[ -f "latest.md" ]]; then
+            echo "Using latest.md for latest.json notes"
+            LATEST_NOTES=$(node scripts/build-release-notes.mjs latest.md)
+          fi
+
+          {
+            echo "release_notes<<EOF"
+            echo "$RELEASE_NOTES"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "latest_notes=$LATEST_NOTES" >> "$GITHUB_OUTPUT"
+
+          PRERELEASE="${{ github.event.inputs.prerelease }}"
+          if [[ -z "$PRERELEASE" ]]; then
+            PRERELEASE="false"
+          fi
+          echo "prerelease=$PRERELEASE" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.meta.outputs.tag_name }}
+          name: ${{ steps.meta.outputs.release_name }}
+          body: ${{ steps.meta.outputs.release_notes }}
+          draft: false
+          prerelease: ${{ steps.meta.outputs.prerelease }}
+          allowUpdates: true
+
+  build:
+    name: Build ${{ matrix.label }} installers
+    needs: prepare-release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: Linux
+            artifact: linux
+            release_json: true
+          - os: macos-latest
+            label: macOS
+            artifact: macos
+            release_json: false
+          - os: windows-latest
+            label: Windows
+            artifact: windows
+            release_json: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Tauri bundle
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: ${{ needs.prepare-release.outputs.tag_name }}
+          releaseName: ${{ needs.prepare-release.outputs.release_name }}
+          # Use latest_notes for latest.json.notes
+          releaseBody: ${{ needs.prepare-release.outputs.latest_notes }}
+          releaseDraft: false
+          prerelease: ${{ needs.prepare-release.outputs.prerelease }}
+          releaseId: ${{ needs.prepare-release.outputs.release_id }}
+          releaseJson: ${{ matrix.release_json }}
+
+      - name: Collect latest.json upgrade manifest
+        if: matrix.release_json == true
+        run: |
+          mkdir -p src-tauri/releases
+          if [ -f src-tauri/target/release/bundle/latest.json ]; then
+            cp src-tauri/target/release/bundle/latest.json src-tauri/releases/latest.json
+          else
+            echo "latest.json not found, skipping copy"
+          fi
+
+      - name: Upload latest.json artifact
+        if: matrix.release_json == true
+        uses: actions/upload-artifact@v4
+        with:
+          name: latest-json
+          path: src-tauri/releases/latest.json
+
+      - name: Upload bundle artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ufactory-studio-${{ matrix.artifact }}
+          path: src-tauri/target/release/bundle

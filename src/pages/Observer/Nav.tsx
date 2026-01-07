@@ -61,7 +61,7 @@ export default function Nav() {
   // 监听网络连接断开事件
   useEffect(() => {
     let unlisten: (() => void) | undefined;
-    listen("ROBOT_CONNECTION_LOST", (payload) => {
+    listen("ROBOT_CONNECTION_LOST", () => {
       disconnect()
     }).then((un) => (unlisten = un));
 

@@ -15,13 +15,7 @@ pub struct WSSdkData {
 
 /// 连接ws状态
 pub async fn ws_connect_state(ip: &str) -> bool {
-    let url = Url::parse(
-        format!(
-            "ws://{}:18333/ws?channel=prod&lang=cn&v=1&id=1752045900705",
-            ip
-        )
-        .as_str(),
-    );
+    let url = Url::parse(format!("ws://{}:18333/ws", ip).as_str());
     if let Err(_) = url {
         return false;
     }

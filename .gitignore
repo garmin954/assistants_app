@@ -32,3 +32,6 @@ release/version
 *.njsproj
 *.sln
 *.sw?
+
+.ugp
+.ugp/**

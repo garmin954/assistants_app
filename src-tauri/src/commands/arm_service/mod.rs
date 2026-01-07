@@ -34,6 +34,7 @@ const DISCONNECT_DELAY_MS: u64 = 100;
 // 观察者检查间隔时间
 const OBSERVER_CHECK_INTERVAL_MS: u64 = 200;
 
+// 连接机械臂服务器
 #[tauri::command(async)]
 pub async fn connect_robot_server<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
