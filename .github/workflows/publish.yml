@@ -110,14 +110,14 @@ jobs:
             label: Linux
             artifact: linux
             release_json: true
-          - os: macos-latest
-            label: macOS
-            artifact: macos
-            release_json: false
-          - os: windows-latest
-            label: Windows
-            artifact: windows
-            release_json: false
+          # - os: macos-latest
+          #   label: macOS
+          #   artifact: macos
+          #   release_json: false
+          # - os: windows-latest
+          #   label: Windows
+          #   artifact: windows
+          #   release_json: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
