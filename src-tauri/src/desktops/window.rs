@@ -20,8 +20,8 @@ pub fn setup_desktop_window(app: &AppHandle) -> tauri::Result<()> {
     // macOS 平台特定配置
     #[cfg(target_os = "macos")]
     {
-        use tauri::utils::TitleBarStyle;
-        main_builder = main_builder.title_bar_style(TitleBarStyle::Transparent);
+        // use tauri::utils::TitleBarStyle;
+        // main_builder = main_builder.title_bar_style(TitleBarStyle::Transparent);
     }
 
     // 构建主窗口和消息窗口
