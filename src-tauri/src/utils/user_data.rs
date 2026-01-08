@@ -1,5 +1,4 @@
 // user_data.rs - 用户数据目录管理
-use anyhow::{Context, Result};
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
 
@@ -33,11 +32,11 @@ impl UserDataPaths {
     /// - Windows: %APPDATA% (Roaming)
     /// - Linux: ~/.config
     /// - macOS: ~/Library/Application Support
-    pub fn new(app: &AppHandle) -> Result<Self> {
+    pub fn new(app: &AppHandle) -> Result<Self, String> {
         let root = app
             .path()
             .app_config_dir()
-            .context("Failed to get app config directory")?;
+            .map_err(|_| format!("Failed to get app config directory"))?;
 
         let logs = root.join("logs");
         let csv_data = root.join("csv_data");
@@ -59,10 +58,10 @@ impl UserDataPaths {
     }
 
     /// 确保所有目录存在
-    fn ensure_dirs_exist(&self) -> Result<()> {
+    fn ensure_dirs_exist(&self) -> Result<(), String> {
         for dir in [&self.logs, &self.csv_data, &self.csv_temp, &self.config] {
             std::fs::create_dir_all(dir)
-                .with_context(|| format!("Failed to create directory: {}", dir.display()))?;
+                .map_err(|_| format!("Failed to create directory: {}", dir.display()))?;
         }
         Ok(())
     }
@@ -81,12 +80,12 @@ impl UserDataPaths {
 
     /// 清理旧的临时文件 (保留最近N天)
     #[allow(dead_code)]
-    pub fn cleanup_temp_files(&self, keep_days: u32) -> Result<()> {
+    pub fn cleanup_temp_files(&self, keep_days: u32) -> Result<(), String> {
         use std::time::{SystemTime, UNIX_EPOCH};
 
         let now = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .context("Failed to get current time")?
+            .map_err(|_| format!("Failed to get current time"))?
             .as_secs();
 
         let cutoff = now - (keep_days as u64 * 24 * 3600);

@@ -2,7 +2,6 @@ use crate::{
     commands::arm_service::{csv_exporter::CsvExporter, robot_client::RobotClient, structs},
     utils::user_data::UserDataPaths,
 };
-use anyhow::Result;
 use tauri::{AppHandle, Emitter}; // ← 这个是关键
 
 use once_cell::sync::OnceCell;
@@ -63,7 +62,7 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn new(app: AppHandle) -> Result<Self> {
+    pub fn new(app: AppHandle) -> Result<Self, String> {
         // 初始化用户数据目录
         let user_data_paths = UserDataPaths::new(&app)?;
 
@@ -87,29 +86,26 @@ impl AppState {
     }
 
     /// 推送共享状态到前端
-    pub fn push_shared_state(&self) -> Result<SharedState> {
-        let shared_state = match self.shared_state.try_read() {
-            Ok(shared_state) => shared_state.clone(),
-            Err(_) => {
-                return Err(anyhow::anyhow!(
-                    "Failed to acquire read lock on shared_state"
-                ))
-            }
-        }; // ← 需要 clone 才能脱离锁作用域
+    pub fn push_shared_state(&self) -> Result<SharedState, String> {
+        let shared_state = self
+            .shared_state
+            .try_read()
+            .map_err(|_| "Failed to acquire read lock on shared_state".to_string())?
+            .clone();
 
         self.app
             .emit("APP_SHARED_STATE", &shared_state)
-            .map_err(|op| anyhow::anyhow!("Failed to emit APP_SHARED_STATE event: {:?}", op))?;
+            .map_err(|op| format!("Failed to emit APP_SHARED_STATE event: {:?}", op))?;
 
         Ok(shared_state)
     }
 
     /// 设置共享状态
-    pub fn set_shared_state(&self, state: SharedState) -> anyhow::Result<()> {
+    pub fn set_shared_state(&self, state: SharedState) -> Result<(), String> {
         let mut shared_state = self
             .shared_state
             .write()
-            .map_err(|_| anyhow::anyhow!("Failed to acquire write lock on shared_state"))?;
+            .map_err(|_| format!("Failed to acquire write lock on shared_state"))?;
 
         *shared_state = state;
         Ok(())
@@ -118,9 +114,9 @@ impl AppState {
 
 // 获取全局的app 实例
 #[allow(dead_code)]
-pub fn get_app_handle() -> Result<Arc<AppHandle<tauri::Wry>>> {
+pub fn get_app_handle() -> Result<Arc<AppHandle<tauri::Wry>>, String> {
     GLOBAL_APP_HANDLE
         .get()
         .cloned()
-        .ok_or_else(|| anyhow::anyhow!("Failed to get global app handle"))
+        .ok_or_else(|| format!("Failed to get global app handle"))
 }

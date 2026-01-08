@@ -1,5 +1,6 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -13,37 +14,81 @@ const DialogClose = DialogPrimitive.Close;
 
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Overlay
-    ref={ref}
-    className={cn(
-      "absolute inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      className
-    )}
-    {...props}
-  />
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay> & { zIndex?: number | string }
+>(({ className, zIndex, style, ...props }, ref) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.3 }}
+  >
+    <DialogPrimitive.Overlay
+      ref={ref}
+      className={cn(
+        "fixed inset-0 bg-black/45",
+        className
+      )}
+      style={{
+        ...style,
+        zIndex,
+      }}
+      {...props}
+    />
+  </motion.div>
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <DialogPortal container={document.getElementById("main-container")}>
-    <DialogOverlay />
-    <DialogPrimitive.Content
-      ref={ref}
-      className={cn(
-        "bg-card absolute left-[50%] top-[8rem] z-50 grid w-full max-w-lg translate-x-[-50%] gap-4 border px-[3rem] py-[2.5rem] shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </DialogPrimitive.Content>
-  </DialogPortal>
-));
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { top?: number, width?: string }
+>(({ className, children, top, width, ...props }, ref) => {
+
+  const zIndex = "auto";
+  const overlayZIndex = "auto";
+
+  const style = React.useMemo(() => {
+    const styles: React.CSSProperties = { zIndex }
+    if (top !== undefined) {
+      styles.top = `${top}rem`;
+    }
+    if (width !== undefined) {
+      styles.width = width;
+    }
+    return styles;
+  }, [top, width, zIndex]);
+
+  return (
+    <DialogPortal container={document.getElementById("main-container")}>
+      <DialogOverlay zIndex={overlayZIndex} />
+      <motion.div
+        initial={{ opacity: 0.8, y: 50, scale: 0.8 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0.8, y: 50, scale: 0.9 }}
+        transition={{
+          type: "spring",
+          damping: 25,
+          stiffness: 300,
+          mass: 1
+        }}
+        className="fixed top-0 bottom-0 left-0 right-0 grid w-[100vw] h-[100vh]"
+        style={{ zIndex }}
+      >
+        <DialogPrimitive.Content
+          ref={ref}
+          className={cn(
+            "bg-card absolute grid w-full left-1/2 -translate-x-1/2 gap-4 border px-[3rem] py-[2.5rem] shadow-xl sm:rounded-lg",
+            top !== undefined ? `` : "top-1/2 -translate-y-1/2",
+            className
+          )}
+          style={style}
+          {...props}
+        >
+          {children}
+        </DialogPrimitive.Content>
+      </motion.div>
+    </DialogPortal>
+  )
+});
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({
@@ -75,7 +120,7 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-[1.6rem] font-semibold leading-none tracking-tight uf-font-medium",
+      "text-[1.8rem] font-semibold leading-none tracking-tight uf-font-medium",
       className
     )}
     {...props}

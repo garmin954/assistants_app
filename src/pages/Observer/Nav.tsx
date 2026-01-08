@@ -21,6 +21,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { toast } from "sonner";
 import { listen } from "@tauri-apps/api/event";
 import Modal from "../components/modal/confirm";
+import LogicUpdater from "@/pages/Updater/LogicUpdater";
 
 const Languages = [
   {
@@ -154,20 +155,23 @@ export default function Nav() {
         </Button>
       </div>
 
-      <Select onValueChange={changeLanguage} defaultValue={i18n.language}>
-        <SelectTrigger className="min-w-[7rem] max-w-[10rem] w-fit">
-          <SelectValue placeholder={curLang?.name}></SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {Languages.map((item) => {
-            return (
-              <SelectItem value={item.code} key={item.code}>
-                {item.name}
-              </SelectItem>
-            );
-          })}
-        </SelectContent>
-      </Select>
+      <div className="flex gap-4 items-center">
+        <LogicUpdater isBeta={false} />
+        <Select onValueChange={changeLanguage} defaultValue={i18n.language}>
+          <SelectTrigger className="min-w-[7rem] max-w-[10rem] w-fit">
+            <SelectValue placeholder={curLang?.name}></SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {Languages.map((item) => {
+              return (
+                <SelectItem value={item.code} key={item.code}>
+                  {item.name}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
+      </div>
     </nav>
   );
 }

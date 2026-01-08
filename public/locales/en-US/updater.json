@@ -1,0 +1,20 @@
+{
+  "title_update_info": "Update Information",
+  "version_prefix": "✨(v{{version}})",
+  "no_content": "No release notes",
+  "cancel": "Cancel",
+  "download_now": "Download Now",
+  "software_update": "Software Update",
+  "speed_label": "Speed: ",
+  "download_complete_tip": "Package downloaded, click Install to continue",
+  "install_now": "Install Now",
+  "checking_update": "Checking Update...",
+  "check_update_failed": "Check Update Failed",
+  "current_version_is_latest": "Current Version is Latest",
+  "download_install_failed": "Download Install Failed",
+  "fetch_history_releases_failed": "Fetch History Releases Failed",
+  "check_update": "Check Update",
+  "new_version_v": "New Version v{{version}}",
+  "latest_version_no_update": "Latest Version, No Update",
+  "update_now": "Update Now"
+}

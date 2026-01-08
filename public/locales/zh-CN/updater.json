@@ -1,0 +1,20 @@
+{
+  "title_update_info": "版本更新信息",
+  "version_prefix": "✨(v{{version}})",
+  "no_content": "暂无版本信息",
+  "cancel": "取消",
+  "download_now": "立即下载",
+  "software_update": "软件更新",
+  "speed_label": "网速：",
+  "download_complete_tip": "安装包下载完成，点击立即安装",
+  "install_now": "立即安装",
+  "checking_update": "检查更新中...",
+  "check_update_failed": "检查更新失败",
+  "current_version_is_latest": "当前已经是最新版本",
+  "download_install_failed": "下载安装失败",
+  "fetch_history_releases_failed": "获取历史版本失败",
+  "check_update": "检查更新",
+  "new_version_v": "新版本v{{version}}",
+  "latest_version_no_update": "最新版本，无需更新",
+  "update_now": "立即更新"
+}

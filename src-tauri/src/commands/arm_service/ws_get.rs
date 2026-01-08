@@ -1,4 +1,3 @@
-use anyhow::anyhow;
 use futures::SinkExt;
 use futures::StreamExt;
 use serde::Serialize;
@@ -101,20 +100,20 @@ pub async fn ws_get_data(ip: &str) -> Result<WSSdkData, Box<dyn Error>> {
                 let ft_sensor_index = field_keys
                     .iter()
                     .position(|item| item == "ft_sensor")
-                    .ok_or_else(|| anyhow!("Missing 'ft_sensor' data"))?;
+                    .ok_or_else(|| format!("Missing 'ft_sensor' data"))?;
                 let ft_sensor = data.get(ft_sensor_index).unwrap();
 
                 let xarm_axis_index = field_keys
                     .iter()
                     .position(|item| item == "xarm_axis")
-                    .ok_or_else(|| anyhow!("Missing 'xarm_axis' data"))?;
+                    .ok_or_else(|| format!("Missing 'xarm_axis' data"))?;
                 let xarm_axis = data.get(xarm_axis_index).unwrap();
 
                 // Replace the problematic line with proper error handling
                 let axis = ft_sensor
                     .get("axis")
                     .and_then(|axis_array| axis_array.get(1))
-                    .ok_or_else(|| anyhow!("Missing 'axis' data or insufficient elements"))?;
+                    .ok_or_else(|| format!("Missing 'axis' data or insufficient elements"))?;
                 let mode = ft_sensor.get("mode").unwrap();
 
                 let open_ft_sensor = axis == 1 && mode == 1;

@@ -25,12 +25,8 @@ pub fn run() {
         }))
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_store::Builder::new().build())
-        .plugin(tauri_plugin_process::init())
-        .plugin(tauri_plugin_os::init())
         .invoke_handler(tauri::generate_handler![
             commands::system::app_exit,
-            commands::system::system_info,
             commands::request::fetch_history_releases,
             commands::tools::set_beta_updater,
             commands::tools::set_stable_updater,
