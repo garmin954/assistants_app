@@ -2,7 +2,7 @@ use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 
 pub fn setup_desktop_window(app: &AppHandle) -> tauri::Result<()> {
     // 主窗口配置
-    let main_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::App("/app".into()))
+    let mut main_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::App("/app".into()))
         .title("")
         .resizable(true)
         .center()
