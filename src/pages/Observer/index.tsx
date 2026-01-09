@@ -1,6 +1,7 @@
 import FilterCriteria from "./FilterCriteria";
 import Nav from "./Nav";
 import Chart from "./Chart";
+import Version from "./Version";
 
 function ObserverChart() {
   console.log("ObserverChart------------------");
@@ -12,6 +13,9 @@ function ObserverChart() {
         <FilterCriteria />
         <Chart />
       </div>
+
+      <Version />
+
     </main>
   );
 }

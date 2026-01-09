@@ -1,5 +1,4 @@
-import { useNavigate, useLocation } from 'react-router-dom';
-import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { useNavigate } from 'react-router-dom';
 import { listen } from '@tauri-apps/api/event';
 
 
@@ -8,18 +7,7 @@ type PayloadType = {
 }
 export async function useTauriInit() {
 
-    const location = useLocation()
     const navigate = useNavigate()
-
-    // tools 默认不调整
-    const msg_box = WebviewWindow.getCurrent();
-    if (msg_box.label === "tools" && location.pathname !== "/tools") {
-        navigate("/tools");
-    }
-
-    if (msg_box.label === "studio" && location.pathname !== "/studio") {
-        open("/studio");
-    }
 
     // 监听open_url事件
     const unListenOpenUrl = await listen<PayloadType>("open_url", (e) => {
