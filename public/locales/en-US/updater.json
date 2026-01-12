@@ -7,6 +7,7 @@
   "software_update": "Software Update",
   "speed_label": "Speed: ",
   "download_complete_tip": "Package downloaded, click Install to continue",
+  "install_complete_tip": "Install complete, please restart the app",
   "install_now": "Install Now",
   "checking_update": "Checking Update...",
   "check_update_failed": "Check Update Failed",

@@ -58,15 +58,27 @@ export const downloadApp = createAsyncThunk('updater/downloadApp', (_data, { dis
 })
 
 // 安装
-export const installApp = createAsyncThunk('updater/installApp', async (_data, { }) => {
+export const installApp = createAsyncThunk('updater/installApp', async (_data, { dispatch }) => {
     if (!(await ensureLinuxAppImage())) {
         return;
     }
-    // 关闭服务
-    let res = await update.install();
-    console.log('installApp', res);
-    // 安装完成后重启应用以加载新版本（兼容 single-instance）
-    // await invoke("restart_app");
+    try {
+        // 关闭服务
+        let res = await update.install();
+        console.log('installApp', res);
+        dispatch(closeDownloadDialog());
+        toast.success(tUpdater("install_complete_tip"), {
+            position: "top-center",
+        });
+        // 安装完成后重启应用以加载新版本（兼容 single-instance）
+        // await invoke("restart_app");
+    } catch (error: any) {
+        toast.error(tUpdater("download_install_failed"), {
+            description: error?.message,
+            position: "top-center",
+        });
+        throw error;
+    }
 })
 
 export const downloadInstall = createAsyncThunk('updater/downloadInstall', async (_data, { dispatch }) => {

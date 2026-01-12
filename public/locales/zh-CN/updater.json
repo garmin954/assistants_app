@@ -7,6 +7,7 @@
   "software_update": "软件更新",
   "speed_label": "网速：",
   "download_complete_tip": "安装包下载完成，点击立即安装",
+  "install_complete_tip": "安装完成，请重新启动应用",
   "install_now": "立即安装",
   "checking_update": "检查更新中...",
   "check_update_failed": "检查更新失败",
