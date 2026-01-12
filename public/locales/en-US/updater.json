@@ -12,6 +12,7 @@
   "check_update_failed": "Check Update Failed",
   "current_version_is_latest": "Current Version is Latest",
   "download_install_failed": "Download Install Failed",
+  "linux_appimage_required": "Auto update requires the AppImage build on Linux",
   "fetch_history_releases_failed": "Fetch History Releases Failed",
   "check_update": "Check Update",
   "new_version_v": "New Version v{{version}}",

@@ -48,6 +48,17 @@ pub async fn set_stable_updater<R: tauri::Runtime>(
     set_updater_urls(app, webview, update_urls).await
 }
 
+#[tauri::command]
+pub async fn is_appimage() -> bool {
+    if cfg!(target_os = "linux") {
+        return std::env::var("APPIMAGE")
+            .map(|value| !value.trim().is_empty())
+            .unwrap_or(false);
+    }
+
+    true
+}
+
 async fn set_updater_urls<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     webview: Webview<R>,

@@ -12,6 +12,7 @@
   "check_update_failed": "检查更新失败",
   "current_version_is_latest": "当前已经是最新版本",
   "download_install_failed": "下载安装失败",
+  "linux_appimage_required": "当前安装方式不支持自动更新，请使用 AppImage 版本",
   "fetch_history_releases_failed": "获取历史版本失败",
   "check_update": "检查更新",
   "new_version_v": "新版本v{{version}}",

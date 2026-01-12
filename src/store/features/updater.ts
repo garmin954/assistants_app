@@ -11,6 +11,15 @@ const tUpdater = (key: string, options?: any) =>
     i18n.t(key, { ns: "updater", ...options }) as string;
 
 console.log('i18n test', i18n.language, i18n.t("updater.checking_update"));
+const ensureLinuxAppImage = async () => {
+    const isAppImage = await invoke<boolean>("is_appimage");
+    if (!isAppImage) {
+        toast.error(tUpdater("linux_appimage_required"), {
+            position: "top-center",
+        });
+    }
+    return isAppImage;
+};
 export const checkUpdater = createAsyncThunk<any, boolean>('updater/checkUpdate', async (isBeta = false) => {
     return await invoke(`set_${isBeta ? "beta" : "stable"}_updater`);
     // return await check();
@@ -50,6 +59,9 @@ export const downloadApp = createAsyncThunk('updater/downloadApp', (_data, { dis
 
 // 安装
 export const installApp = createAsyncThunk('updater/installApp', async (_data, { }) => {
+    if (!(await ensureLinuxAppImage())) {
+        return;
+    }
     // 关闭服务
     let res = await update.install();
     console.log('installApp', res);
@@ -58,6 +70,9 @@ export const installApp = createAsyncThunk('updater/installApp', async (_data, {
 })
 
 export const downloadInstall = createAsyncThunk('updater/downloadInstall', (_data, { dispatch }) => {
+    if (!(await ensureLinuxAppImage())) {
+        return;
+    }
     let contentLength = 0
     let downloaded = 0
     return update.downloadAndInstall((event) => {

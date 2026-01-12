@@ -30,6 +30,7 @@ pub fn run() {
             commands::request::fetch_history_releases,
             commands::tools::set_beta_updater,
             commands::tools::set_stable_updater,
+            commands::tools::is_appimage,
             commands::arm_service::connect_robot_server,
             commands::arm_service::disconnect_robot_server,
             commands::arm_service::start_assistant,
