@@ -178,6 +178,14 @@ jobs:
             echo "latest.json not found, skipping copy"
           fi
 
+      - name: Keep AppImage only in latest.json
+        if: matrix.release_json == true
+        shell: bash
+        run: |
+          if [ -f src-tauri/releases/latest.json ]; then
+            node -e "const fs=require('fs');const p='src-tauri/releases/latest.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));const platforms=j.platforms||{};delete platforms['linux-x86_64-deb'];delete platforms['linux-x86_64-rpm'];j.platforms=platforms;fs.writeFileSync(p, JSON.stringify(j, null, 2));"
+          fi
+
       - name: Upload latest.json artifact
         if: matrix.release_json == true
         uses: actions/upload-artifact@v4
