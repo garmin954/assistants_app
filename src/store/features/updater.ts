@@ -69,7 +69,7 @@ export const installApp = createAsyncThunk('updater/installApp', async (_data, {
     // await invoke("restart_app");
 })
 
-export const downloadInstall = createAsyncThunk('updater/downloadInstall', (_data, { dispatch }) => {
+export const downloadInstall = createAsyncThunk('updater/downloadInstall', async (_data, { dispatch }) => {
     if (!(await ensureLinuxAppImage())) {
         return;
     }
