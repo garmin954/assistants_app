@@ -40,7 +40,8 @@
       "dialog": true,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlDRTQxQzQwRDkwNTMyODUKUldTRk1nWFpRQnprbkxxdk4reEI0WVN6SEpaRVlKQm04KzZ6WHFjZURkUVF4YWNWYTdES1QrZ3EK",
       "endpoints": [
-        "http://192.168.1.19/releases/xarm/assistant/latest.json",
+        "http://192.168.1.19/releases/xarm/assistant/releases.json.json",
+        "http://192.168.1.19/releases/xarm/assistant/test.json",
         "https://github.com/garmin954/assistants_app/releases/latest/download/latest.json"
       ],
       "dangerousInsecureTransportProtocol": true
