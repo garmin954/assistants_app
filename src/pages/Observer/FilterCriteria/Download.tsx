@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { useDisabled } from "./SelectField";
+import { useAppSelector } from "@/hooks/reduxHooks";
 
 
 export default function Download() {
@@ -23,12 +24,8 @@ export default function Download() {
 
     const { disabled } = useDisabled()
 
-    const { csv, observer } = useSelector<RootState, { csv: boolean, observer: boolean }>(
-        (state) => ({
-            csv: state.assistants.filter_field.csv,
-            observer: state.assistants.filter_field.observer,
-        })
-    );
+    const csv = useAppSelector((state) => state.assistants.filter_field.csv)
+    const observer = useAppSelector((state) => state.assistants.filter_field.observer)
 
     // 下载按钮
     const [showDownload, setShowDownload] = useState<boolean>(false);

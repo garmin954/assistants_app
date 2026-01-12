@@ -2,7 +2,7 @@ import { UPDATER_STEP } from "@/lib/constant";
 import i18n from "@/lib/i18n";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { invoke } from "@tauri-apps/api/core";
-import { check, Update } from "@tauri-apps/plugin-updater";
+import { Update } from "@tauri-apps/plugin-updater";
 import { toast } from "sonner";
 let update: Update
 
@@ -12,7 +12,6 @@ const tUpdater = (key: string, options?: any) =>
 
 console.log('i18n test', i18n.language, i18n.t("updater.checking_update"));
 export const checkUpdater = createAsyncThunk<any, boolean>('updater/checkUpdate', async (isBeta = false) => {
-    await check();
     return await invoke(`set_${isBeta ? "beta" : "stable"}_updater`);
     // return await check();
 })
@@ -151,12 +150,22 @@ const slice = createSlice({
         })
         builder.addCase(checkUpdater.fulfilled, (state, { payload: up }) => {
             state.isLoading = false;
-            const { code, data } = up
+            const { code, data, message } = up
+            console.log('data===>', up)
+
+            if (code === -1) {
+                toast.error(tUpdater("check_update_failed"), {
+                    description: message,
+                    position: "top-center",
+                });
+                return;
+            }
 
             if (code === 0 && data?.is_latest) {
                 state.step = UPDATER_STEP.NORMAL
                 return;
             }
+
 
             const { version, currentVersion, date = "", body = "" } = data
             state.updater = ({

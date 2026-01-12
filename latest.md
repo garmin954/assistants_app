@@ -7,7 +7,7 @@ false
 This version fixes important vulnerabilities, please update immediately!
 # content
 ## zhCn
-- 新增更新检查
+- 修复已知问题
 
 ## enUs
-- Add update check
+- Fix known issues

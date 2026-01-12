@@ -75,16 +75,14 @@ export function setChartSeries(data: number[], name = "") {
         },
         animation: false,
         smooth: data.length < 1000,
-        symbol: 'circle',  // 保留符号
+        symbol: 'none',  // 保留符号
         symbolSize: 5,     // 设置符号大小
         itemStyle: {
-            normal: {
-                opacity: 0,
-            },
             borderWidth: 1
         },
         seriesLayoutBy: 'row',
         markPoint: {
+            symbol: 'none',
             data: []
         },
     }

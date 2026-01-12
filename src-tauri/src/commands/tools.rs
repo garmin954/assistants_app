@@ -28,13 +28,9 @@ pub async fn set_beta_updater<R: tauri::Runtime>(
 ) -> Response<serde_json::Value> {
     info!("开始检查测试版更新");
 
-    let update_url =
-        match tauri::Url::parse("http://192.168.1.19/releases/xarm/assistant/releases_beta.json") {
-            Ok(url) => url,
-            Err(e) => return Response::error(format!("解析更新URL失败: {}", e)),
-        };
+    let update_urls = vec!["http://192.168.1.19/releases/xarm/assistant/releases_beta.json"];
 
-    set_updater_url(app, webview, update_url).await
+    set_updater_urls(app, webview, update_urls).await
 }
 
 #[tauri::command]
@@ -44,22 +40,29 @@ pub async fn set_stable_updater<R: tauri::Runtime>(
 ) -> Response<serde_json::Value> {
     info!("开始检查生产版更新");
 
-    let update_url =
-        match tauri::Url::parse("http://192.168.1.19/releases/xarm/assistant/releases.json") {
-            Ok(url) => url,
-            Err(e) => return Response::error(format!("解析更新URL失败: {}", e)),
-        };
+    let update_urls = vec![
+        "http://192.168.1.19/releases/xarm/assistant/latest.json",
+        "https://github.com/garmin954/assistants_app/releases/latest/download/latest.json",
+    ];
 
-    set_updater_url(app, webview, update_url).await
+    set_updater_urls(app, webview, update_urls).await
 }
 
-async fn set_updater_url<R: tauri::Runtime>(
+async fn set_updater_urls<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     webview: Webview<R>,
-    update_url: tauri::Url,
+    update_urls: Vec<&str>,
 ) -> Response<serde_json::Value> {
-    if let Ok(ub) = app.updater_builder().endpoints(vec![update_url]) {
-        info!("测试版更新器初始化成功");
+    let mut endpoints = Vec::with_capacity(update_urls.len());
+    for url in update_urls {
+        match tauri::Url::parse(url) {
+            Ok(parsed) => endpoints.push(parsed),
+            Err(e) => return Response::error(format!("解析更新URL失败: {}", e)),
+        }
+    }
+
+    if let Ok(ub) = app.updater_builder().endpoints(endpoints) {
+        info!("更新器初始化成功");
         // 构建更新检查器
         let updater = match ub.build() {
             Ok(u) => u,
