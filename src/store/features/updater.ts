@@ -141,6 +141,7 @@ const slice = createSlice({
         step: UPDATER_STEP.CHECK,
         download: {
             showDialog: false,
+            isMinimized: false,
             progress: 0,
             totalSize: 0,
             downloaded: 0,
@@ -160,6 +161,9 @@ const slice = createSlice({
         closeDownloadDialog(state) {
             state.download.showDialog = false
         },
+        toggleMinimizeDialog(state) {
+            state.download.isMinimized = !state.download.isMinimized
+        },
         downloadProgress(state, action) {
             state.download = { ...state.download, ...action.payload }
         },
@@ -178,7 +182,6 @@ const slice = createSlice({
         builder.addCase(checkUpdater.fulfilled, (state, { payload: up }) => {
             state.isLoading = false;
             const { code, data, message } = up
-            console.log('data===>', up)
 
             if (code === -1) {
                 toast.error(tUpdater("check_update_failed"), {
@@ -281,4 +284,4 @@ const slice = createSlice({
 
 export default slice.reducer
 export type UpdaterState = ReturnType<typeof slice.getInitialState>;
-export const { setUpdaterStep, closeDownloadDialog } = slice.actions
+export const { setUpdaterStep, closeDownloadDialog, toggleMinimizeDialog } = slice.actions

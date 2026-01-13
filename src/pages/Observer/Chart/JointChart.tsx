@@ -49,7 +49,6 @@ type RefType = {
 };
 
 export default React.forwardRef<RefType, Props>((props, ref) => {
-  console.log('JointChart------------------');
 
   const { t, i18n } = useTranslation();
   const enlargeRef = useRef(null);

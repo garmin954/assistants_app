@@ -28,7 +28,6 @@ const slice = createSlice({
         },
 
         setSharedData(state, action) {
-            console.log('setSharedData==>', action.payload);
             const { arm_conn, axis, ft_sensor, observering } = action.payload;
             state.shared_state.arm_conn = arm_conn;
             state.shared_state.axis = axis;

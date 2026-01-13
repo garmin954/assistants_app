@@ -4,7 +4,6 @@ import Chart from "./Chart";
 import Version from "./Version";
 
 function ObserverChart() {
-  console.log("ObserverChart------------------");
 
   return (
     <main className="bg-background text-foreground h-full">

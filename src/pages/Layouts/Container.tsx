@@ -9,7 +9,6 @@ import { Outlet } from "react-router-dom";
 export default function LayoutContainer() {
   const themeRef = useRef<HTMLDivElement>(null);
 
-  console.log("LayoutContainer-----------");
   const dispatch = useDispatch<RootDispatch>();
 
   useEffect(() => {

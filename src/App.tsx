@@ -10,8 +10,6 @@ import { Toaster } from "./components/ui/sonner";
 // import { attachConsole } from "@tauri-apps/plugin-log";
 // attachConsole();
 function App() {
-  console.log("App---------------->");
-
   return (
     <ThemeProvider>
       <Provider store={store}>

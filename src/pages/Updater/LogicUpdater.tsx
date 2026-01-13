@@ -1,18 +1,19 @@
 import { UPDATER_STEP } from "@/lib/constant";
-import { RootDispatch, RootState } from "@/store";
+import { RootDispatch } from "@/store";
 import {
   checkUpdater,
-  UpdaterState,
   downloadApp,
   closeDownloadDialog,
 } from "@/store/features/updater";
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useCallback, useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import ReleaseDescDialog from "./ReleaseDescDialog";
 import DownloadProgress from "./DownloadProgress";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
+import { useAppSelector } from "@/hooks/reduxHooks";
+import { useWhyDidYouUpdate } from "ahooks";
 
 interface Props {
   className?: string;
@@ -21,12 +22,16 @@ interface Props {
 export default function LogicUpdater(props: Props) {
   const { i18n, t } = useTranslation("updater");
   const { isBeta = false } = props;
-  const state = useSelector<RootState, UpdaterState>((state) => state.updater);
+  const step = useAppSelector((state) => state.updater.step);
+  const updater = useAppSelector((state) => state.updater.updater);
+  const isLoading = useAppSelector((state) => state.updater.isLoading);
+
   const dispatch = useDispatch<RootDispatch>();
   const [showDesc, setShowDesc] = useState(false);
 
-  async function onUpdate() {
-    switch (state.step) {
+  const onUpdate = useCallback(async () => {
+    console.log('onUpdate===>');
+    switch (step) {
       case UPDATER_STEP.NORMAL:
       case UPDATER_STEP.CHECK:
         dispatch(closeDownloadDialog())
@@ -43,31 +48,53 @@ export default function LogicUpdater(props: Props) {
       default:
         break;
     }
-  }
-  const upd = state.updater;
+  }, [step, isBeta, dispatch]);
 
   useEffect(() => {
-    onUpdate()
-  }, []);
+    // 仅在组件挂载时执行一次检查，模拟 componentDidMount
+    const initCheck = async () => {
+      // 这里如果直接调用 onUpdate，它会闭包当时 step 的状态
+      // 由于这里只是为了初始化检查，通常 step 初始就是 CHECK/NORMAL
+      // 如果需要复用逻辑，可以手动 dispatch checkUpdater
+      dispatch(checkUpdater(isBeta));
+    }
+    initCheck();
+  }, []); // 保持空依赖数组，只在挂载时检查
 
-  function handleInstall() {
+
+  const handleInstall = useCallback(() => {
     setShowDesc(false)
     dispatch(downloadApp())
-  }
+  }, [dispatch]);
+
+  const handleClose = useCallback(() => {
+    setShowDesc(false)
+  }, []);
+
+  useWhyDidYouUpdate("LogicUpdater", {
+    step,
+    updater,
+    isLoading,
+    dispatch,
+    showDesc,
+    setShowDesc,
+    onUpdate,
+    handleInstall,
+  })
 
   return (
     <>
       {
-        state.step === UPDATER_STEP.DOWNLOAD || state.step === UPDATER_STEP.INSTALL ? (
+        step === UPDATER_STEP.DOWNLOAD || step === UPDATER_STEP.INSTALL ? (
           <Button
             className={clsx("min-w-[8rem] relative")}
             onClick={onUpdate}
-            loading={state.isLoading}
+            loading={isLoading}
             variant="outline"
           >
             <div className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-green-500 "></div>
-            {state.step === UPDATER_STEP.DOWNLOAD && t("new_version_v", { version: upd.version })}
-            {state.step === UPDATER_STEP.INSTALL && t("install_now")}
+            {step === UPDATER_STEP.DOWNLOAD && t("new_version_v", { version: updater.version })}
+            {step === UPDATER_STEP.INSTALL && t("install_now")}
           </Button>
         ) : null
       }
@@ -76,9 +103,9 @@ export default function LogicUpdater(props: Props) {
       <ReleaseDescDialog
         show={showDesc}
         onInstall={handleInstall}
-        onClose={() => setShowDesc(false)}
-        content={i18n.language === "cn" ? upd.body.content.cn : upd.body.content.en}
-        version={upd.version}
+        onClose={handleClose}
+        content={i18n.language === "cn" ? updater.body.content.cn : updater.body.content.en}
+        version={updater.version}
       />
 
       <DownloadProgress />
